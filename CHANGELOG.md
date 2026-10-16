@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 (4) — 2026-10-16
+
+- Carries forward the 1.0.3 calibration and video warmup fixes below.
+- Keep live video running after calibration and task completion so the next task does not replay the buffered history again.
+- End-to-end operation on iOS 27.2 beta remains unverified.
+
 ## 1.0.3 (3) — 2026-10-16
 
 - Begin receiving mirrored video during setup so task startup does not first transfer a long backlog.

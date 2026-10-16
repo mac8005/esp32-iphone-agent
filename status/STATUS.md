@@ -3,7 +3,7 @@ Updated: 2026-10-16
 
 ## In flight
 - 1.0.2 (2) failed on the phone: no current post-Home frame. New logs also show calibration accepted a 49.8% miss.
-- Preparing 1.0.3 (3): receive video during setup, reject bad calibration, include startup video metrics. All 87 simulator tests pass.
+- 1.0.3 (3) uploaded with warmup/calibration fixes; all 87 tests passed. Preparing replacement 1.0.4 (4) to retain streaming across calibration/task completion; tests running.
 - MBA USB board flashed with heartbeat/debug video-throttling repair; upload checksum verified, USB ok after reboot, encrypted credential retained.
 - MBA Terminal BLE benchmarks pass: 128 KB at 200 kbps, 256 KB with 0.5 s pings at 195 kbps, zero gaps; ping replies 54–145 ms. iOS 27.2 beta end-to-end success remains unverified.
 
@@ -15,7 +15,7 @@ Updated: 2026-10-16
 - Verify board identity before flashing and exact build testing notes after upload.
 
 ## Next
-1. Apple accepted 1.0.3 (3), delivery 4437cb81-f91b-429d-80db-b82f3913a98c; processing and exact localized TestFlight notes readback pending.
+1. Complete replacement 1.0.4 (4) tests and release; verify both uploaded builds' localized notes and availability.
 2. Verify fresh Home frames and real phone actions; do not equate guard failures or upload success with a working agent.
 
 ## Gotchas
@@ -26,6 +26,7 @@ Updated: 2026-10-16
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-16: Final lifecycle review found explicit stream stops after calibration and task completion would replay history on next warmup. Removed these in streaming mode; preparing replacement 1.0.4 (4), tests running.
 - 2026-10-16: Apple accepted 1.0.3 (3). On-board BLE tests pass at 200 kbps idle and 195 kbps with 0.5 s heartbeat traffic, zero gaps, 54–145 ms replies. SSH Bluetooth is denied; launch diagnostics as a Terminal .command via open on MBA.
 - 2026-10-16: Firmware checksum and post-flash USB/credential retention verified on MBA. All 87 simulator tests pass; 1.0.3 (3) archive signed successfully and release pipeline running. Commit 868dd47.
 - 2026-10-16: Latest log confirms 49.8% calibration error accepted and startup video stale. Prepared calibration rejection, setup video reception, and firmware heartbeat/debug throttle exemption. MBA USB connected; BLE diagnostics blocked by macOS privacy permission.
