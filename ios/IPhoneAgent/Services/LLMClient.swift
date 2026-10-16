@@ -49,6 +49,7 @@ struct LLMError: LocalizedError {
     private(set) var tokenParam: String
     private var auto: Bool
     private let session: URLSession
+    private var usesOpenAIReasoning: Bool { baseURL.host == "api.openai.com" && model.hasPrefix("gpt-6") }
 
     init(baseURL: String, model: String, apiKey: String = "", extra: [String: Any] = [:],
          tokenParam: String = "auto", session: URLSession? = nil) {
@@ -95,6 +96,10 @@ struct LLMError: LocalizedError {
         }
         content.append(["type": "text", "text": text])
         var body: [String: Any] = ["model": model, "temperature": temperature]
+        if usesOpenAIReasoning {
+            body.removeValue(forKey: "temperature")
+            body["reasoning_effort"] = "low"
+        }
         extra.forEach { body[$0.key] = $0.value }
         body["messages"] = [["role": "system", "content": system], ["role": "user", "content": content]]
         body["stream"] = true
@@ -153,7 +158,11 @@ struct LLMError: LocalizedError {
     private func post(_ body: [String: Any], maxTokens: Int, started: Double) async throws
         -> (Int, ChatResult?, String) {
         var body = body
-        body[tokenParam] = maxTokens
+        if usesOpenAIReasoning {
+            body["max_completion_tokens"] = max(maxTokens, 4096)
+        } else {
+            body[tokenParam] = maxTokens
+        }
         var request = URLRequest(url: baseURL.appendingPathComponent("chat/completions"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

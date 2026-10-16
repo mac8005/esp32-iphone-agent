@@ -137,6 +137,21 @@ final class StubProtocol: URLProtocol {
         }
     }
 
+    func testOpenAIReasoningUsesSupportedParametersAndReasoningBudget() async throws {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [StubProtocol.self]
+        let llm = LLMClient(baseURL: "https://api.openai.com/v1", model: "gpt-6.1-sol",
+                            session: URLSession(configuration: config))
+        fakeServer(wants: "max_completion_tokens")
+        _ = try await llm.chat(system: "sys", text: "pointer", maxTokens: 200, temperature: 0)
+        let body = try XCTUnwrap(StubProtocol.seen.first)
+        XCTAssertNil(body["temperature"])
+        XCTAssertNil(body["max_tokens"])
+        XCTAssertEqual(body["reasoning_effort"] as? String, "low")
+        XCTAssertEqual(body["max_completion_tokens"] as? Int, 4096)
+        XCTAssertEqual(StubProtocol.seen.count, 1)
+    }
+
     func testClassicServersGetMaxTokensOnce() async throws {
         let llm = client("qwen")
         fakeServer(wants: "max_tokens")
