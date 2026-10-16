@@ -3,7 +3,7 @@ Updated: 2026-10-16
 
 ## In flight
 - Release complete: ESP32 Agent 1.0.1 (1) is IN_BETA_TESTING / Ready to Test for Personal Testing; account holder invited.
-- First-use iPhone pairing, mirroring, AssistiveTouch, calibration, and physical control validation remain on-device steps.
+- User confirmed calibration succeeds, but tasks appear idle on Home Screen. Uploaded trace shows delayed startup and stale/corrupted video; physical control remains unverified.
 
 ## Decisions
 - Keep provider credentials out of Git; use private internal TestFlight distribution.
@@ -13,8 +13,8 @@ Updated: 2026-10-16
 - Verify board identity before flashing and exact build testing notes after upload.
 
 ## Next
-1. Accept the TestFlight invitation on iPhone and install ESP32 Agent.
-2. Connect the board by a USB data cable, pair in the app, join its hotspot, enable AssistiveTouch and Screen Mirroring, then calibrate.
+1. Diagnose video backlog/replay and decoder recovery using live Diagnostics; trace export lacks debug.log.
+2. Verify fresh, intact post-action frames and actual phone control before declaring the runtime working.
 
 ## Gotchas
 - Internal testers must be added through Apple's web interface; an external betaTester record with the same email cannot be assigned. Future releases reuse the existing internal member.
@@ -24,6 +24,7 @@ Updated: 2026-10-16
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-16: Inspected user trace: first planner record at +180.7 s (request 3.02 s), later reported frame offsets -183.63 to -198.26 s, visible corruption in 006.jpg. Model replies succeed; root transport/decoder trigger remains unproven. No firmware/app fix deployed.
 - 2026-10-16: Released 1.0.1 (1), build 8a7f8276-ffcf-4ac4-b6bf-9c06504712d5. Verified IN_BETA_TESTING, owner membership, and exact en-US/zh-Hans notes; history in .testflight/releases/1.0.1-1.json.
 - 2026-10-16: Signed archive/export passed, upload started. Board credential survived restart and decrypted correctly.
 - 2026-10-16: Recovered Safari, completed Apple capabilities/profiles, provisioned board, passed 83 signed simulator tests.
