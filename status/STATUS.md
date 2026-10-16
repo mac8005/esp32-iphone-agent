@@ -2,10 +2,10 @@
 Updated: 2026-10-16
 
 ## In flight
-- 1.0.2 (2) failed on the phone: no current post-Home frame. New logs also show calibration accepted a 49.8% miss.
-- 1.0.3 (3) IN_BETA_TESTING with localized notes verified; all 87 tests passed. Replacement 1.0.4 (4) retains streaming across calibration/task completion; all 87 tests pass, uploaded successfully; waiting for Apple processing and TestFlight finalization.
-- MBA USB board flashed with heartbeat/debug video-throttling repair; upload checksum verified, USB ok after reboot, encrypted credential retained.
-- MBA Terminal BLE benchmarks pass: 128 KB at 200 kbps, 256 KB with 0.5 s pings at 195 kbps, zero gaps; ping replies 54–145 ms. iOS 27.2 beta end-to-end success remains unverified.
+- ESP32 firmware updated on MBA; upload checksum, USB health and encrypted credential retention verified.
+- ESP32 Agent 1.0.4 (4) IN_BETA_TESTING for Personal Testing; exact en-US/zh-Hans notes read back and verified. Receipt: .testflight/releases/1.0.4-4.json.
+- All 87 simulator tests pass. MBA BLE: 200 kbps idle, 195 kbps with 0.5 s pings, zero gaps, replies 54–145 ms.
+- Physical iOS 27.2 beta success remains unverified. Old calibration with 49.8% error is rejected and requires recalibration; earlier screenshot had Snap to Item on.
 
 ## Decisions
 - Keep provider credentials out of Git; use private internal TestFlight distribution.
@@ -15,8 +15,8 @@ Updated: 2026-10-16
 - Verify board identity before flashing and exact build testing notes after upload.
 
 ## Next
-1. Finalize uploaded replacement 1.0.4 (4), delivery 5e119d9b-c724-407f-8ca9-f598fffd02b3; verify localized notes and availability.
-2. Verify fresh Home frames and real phone actions; do not equate guard failures or upload success with a working agent.
+1. Verify accurate calibration with Snap to Item off, fresh Home frames and real phone actions on 1.0.4 (4).
+2. If still failing, inspect startup video metrics; keep board transport and iOS background decoding evidence separate. Do not claim the agent works from a successful upload or Mac BLE benchmark.
 
 ## Gotchas
 - Internal testers must be added through Apple's web interface; an external betaTester record with the same email cannot be assigned. Future releases reuse the existing internal member.
@@ -26,6 +26,7 @@ Updated: 2026-10-16
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-16: Released 1.0.4 (4), build 5e119d9b-c724-407f-8ca9-f598fffd02b3, IN_BETA_TESTING. Personal Testing membership and exact en-US/zh-Hans notes verified. All 87 tests pass; physical iOS 27.2 beta validation pending.
 - 2026-10-16: 1.0.3 (3) IN_BETA_TESTING and en-US/zh-Hans notes verified; receipt saved. Replacement 1.0.4 (4) upload accepted, awaiting Apple processing.
 - 2026-10-16: Replacement 1.0.4 (4), commit 575f6d0, passes all 87 tests. Release pipeline started; no further firmware changes needed.
 - 2026-10-16: Final lifecycle review found explicit stream stops after calibration and task completion would replay history on next warmup. Removed these in streaming mode; preparing replacement 1.0.4 (4), tests running.
@@ -40,4 +41,3 @@ Updated: 2026-10-16
 - 2026-10-16: Inspected user trace: first planner record at +180.7 s (request 3.02 s), later reported frame offsets -183.63 to -198.26 s, visible corruption in 006.jpg. Model replies succeed; root transport/decoder trigger remains unproven. No firmware/app fix deployed.
 - 2026-10-16: Released 1.0.1 (1), build 8a7f8276-ffcf-4ac4-b6bf-9c06504712d5. Verified IN_BETA_TESTING, owner membership, and exact en-US/zh-Hans notes; history in .testflight/releases/1.0.1-1.json.
 - 2026-10-16: Signed archive/export passed, upload started. Board credential survived restart and decrypted correctly.
-- 2026-10-16: Recovered Safari, completed Apple capabilities/profiles, provisioned board, passed 83 signed simulator tests.
