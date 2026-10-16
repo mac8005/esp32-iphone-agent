@@ -3,7 +3,7 @@ Updated: 2026-10-16
 
 ## In flight
 - 1.0.2 (2) failed on the phone: no current post-Home frame. New logs also show calibration accepted a 49.8% miss.
-- 1.0.3 (3) uploaded with warmup/calibration fixes; all 87 tests passed. Preparing replacement 1.0.4 (4) to retain streaming across calibration/task completion; tests running.
+- 1.0.3 (3) uploaded with warmup/calibration fixes; all 87 tests passed. Replacement 1.0.4 (4) retains streaming across calibration/task completion; all 87 tests pass, archive/release pipeline running.
 - MBA USB board flashed with heartbeat/debug video-throttling repair; upload checksum verified, USB ok after reboot, encrypted credential retained.
 - MBA Terminal BLE benchmarks pass: 128 KB at 200 kbps, 256 KB with 0.5 s pings at 195 kbps, zero gaps; ping replies 54–145 ms. iOS 27.2 beta end-to-end success remains unverified.
 
@@ -26,6 +26,7 @@ Updated: 2026-10-16
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-16: Replacement 1.0.4 (4), commit 575f6d0, passes all 87 tests. Release pipeline started; no further firmware changes needed.
 - 2026-10-16: Final lifecycle review found explicit stream stops after calibration and task completion would replay history on next warmup. Removed these in streaming mode; preparing replacement 1.0.4 (4), tests running.
 - 2026-10-16: Apple accepted 1.0.3 (3). On-board BLE tests pass at 200 kbps idle and 195 kbps with 0.5 s heartbeat traffic, zero gaps, 54–145 ms replies. SSH Bluetooth is denied; launch diagnostics as a Terminal .command via open on MBA.
 - 2026-10-16: Firmware checksum and post-flash USB/credential retention verified on MBA. All 87 simulator tests pass; 1.0.3 (3) archive signed successfully and release pipeline running. Commit 868dd47.
@@ -40,4 +41,3 @@ Updated: 2026-10-16
 - 2026-10-16: Signed archive/export passed, upload started. Board credential survived restart and decrypted correctly.
 - 2026-10-16: Recovered Safari, completed Apple capabilities/profiles, provisioned board, passed 83 signed simulator tests.
 - 2026-10-16: Flashed firmware, verified upload hash, passed iOS and host tests; Apple web setup pending.
-- 2026-10-16: Created fork and confirmed MacBook Air SSH and attached serial port.
