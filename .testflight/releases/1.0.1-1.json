@@ -1,0 +1,17 @@
+{
+  "appId": "6823679885",
+  "version": "1.0.1",
+  "build": "1",
+  "buildId": "8a7f8276-ffcf-4ac4-b6bf-9c06504712d5",
+  "group": "Personal Testing",
+  "testerState": "INVITED",
+  "notes": {
+    "en-US": "First personal build for the XIAO ESP32-S3. Uses OpenAI GPT-6.1 Sol with low reasoning effort for vision and phone control. The paired board securely supplies the configured credential; no API key entry is required.\n\nConnect the board to your iPhone, pair it in the app, join its hotspot, enable AssistiveTouch, and start Screen Mirroring to ESP32 Agent. Keep cellular data enabled for model requests. Complete pointer calibration before running a task.\n\nCheck Bluetooth reconnects, screen updates, pointer calibration, and the model connection test. iPhone pairing, mirroring, and physical pointer control still require first-use validation.",
+    "zh-Hans": "适用于 XIAO ESP32-S3 的首个个人测试版本。使用 OpenAI GPT-6.1 Sol 和低推理强度进行视觉识别及手机控制。配对后的开发板会提供已配置的加密凭据，无需手动输入 API 密钥。\n\n将开发板连接到 iPhone，在应用中完成蓝牙配对并加入开发板热点，开启辅助触控，然后将屏幕镜像投送到 ESP32 Agent。请保持蜂窝数据开启，以便访问模型。运行任务前请完成指针校准。\n\n请测试蓝牙重连、屏幕更新、指针校准和模型连接。iPhone 配对、屏幕镜像和实际指针控制仍需首次使用验证。"
+  },
+  "betaState": {
+    "autoNotifyEnabled": true,
+    "internalBuildState": "IN_BETA_TESTING",
+    "externalBuildState": "NOT_APPLICABLE"
+  }
+}

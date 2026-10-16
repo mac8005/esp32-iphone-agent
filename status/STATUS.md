@@ -2,12 +2,8 @@
 Updated: 2026-10-16
 
 ## In flight
-- Preparing first personal release: ESP32 firmware on MacBook Air and configured iOS TestFlight app.
-- Firmware flashed and verified on XIAO ESP32-S3 (8 MB flash/PSRAM), core 3.3.7, NimBLE 2.5.1. Antenna mounted and reconnected by owner.
-- 83 signed iOS simulator tests passed, including authenticated preset import and Keychain persistence.
-- Apple app 6823679885 created; both bundle IDs assigned group.com.massimo.esp32agent. Distribution profiles and all required entitlements verified.
-- Firmware reflashed with USB provisioning/status commands. Encrypted credential read back and decrypted successfully; USB ok, hotspot AP, 3.37 MB free PSRAM, configuration 353 bytes.
-- TestFlight 1.0.1 (1) archive/export succeeded; package verified free of provider API key. Upload running; processing, owner availability, and localized notes remain pending.
+- Release complete: ESP32 Agent 1.0.1 (1) is IN_BETA_TESTING / Ready to Test for Personal Testing; account holder invited.
+- First-use iPhone pairing, mirroring, AssistiveTouch, calibration, and physical control validation remain on-device steps.
 
 ## Decisions
 - Keep provider credentials out of Git; use private internal TestFlight distribution.
@@ -17,16 +13,18 @@ Updated: 2026-10-16
 - Verify board identity before flashing and exact build testing notes after upload.
 
 ## Next
-1. Monitor release-driver.log under /Volumes/MacMiniData/Developer/esp32-iphone-agent; release script is uploading 1.0.1 (1).
-2. Verify exact build available to account holder and testing notes.
-3. Record release. Physical phone pairing/mirroring/AssistiveTouch/calibration remain first-use steps.
+1. Accept the TestFlight invitation on iPhone and install ESP32 Agent.
+2. Connect the board by a USB data cable, pair in the app, join its hotspot, enable AssistiveTouch and Screen Mirroring, then calibrate.
 
 ## Gotchas
+- Internal testers must be added through Apple's web interface; an external betaTester record with the same email cannot be assigned. Future releases reuse the existing internal member.
+- Resume an uploaded release with .testflight/deploy-personal.py VERSION BUILD --finalize-only.
 - Phone requires cellular data while connected to the board hotspot.
 - Initial Bluetooth, screen mirroring, and AssistiveTouch permissions require interaction on the phone.
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-16: Released 1.0.1 (1), build 8a7f8276-ffcf-4ac4-b6bf-9c06504712d5. Verified IN_BETA_TESTING, owner membership, and exact en-US/zh-Hans notes; history in .testflight/releases/1.0.1-1.json.
 - 2026-10-16: Signed archive/export passed, upload started. Board credential survived restart and decrypted correctly.
 - 2026-10-16: Recovered Safari, completed Apple capabilities/profiles, provisioned board, passed 83 signed simulator tests.
 - 2026-10-16: Flashed firmware, verified upload hash, passed iOS and host tests; Apple web setup pending.

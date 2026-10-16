@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased (main)
+## 1.0.1 (1) — 2026-10-16
 
-- Personal release preparation for XIAO ESP32-S3 and TestFlight.
+- First personal TestFlight release for XIAO ESP32-S3, preconfigured for GPT-6.1 Sol with low reasoning effort.
 - OpenAI GPT-6 vision support with compatible request parameters and reasoning budget for pointer calibration.
 - Personal vision setup imports an encrypted credential from the paired board into the iPhone Keychain; the provider key is absent from the app package.
 

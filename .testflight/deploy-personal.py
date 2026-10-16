@@ -55,8 +55,9 @@ if not args.finalize_only:
     subprocess.run([py, lock, 'acquire', '--receipt', str(receipt), '--label', f'ESP32 Agent {args.build}'], check=True)
     try:
         password = subprocess.check_output(['security','find-generic-password','-s','io.sidepulse.distribution-signing-20260911','-a','release','-w','/Users/massimo/Library/Keychains/login.keychain-db'], text=True).strip()
-        subprocess.run(['security','unlock-keychain','-p',password,keychain], check=True)
+        unlocked = subprocess.run(['security','unlock-keychain','-p',password,keychain], capture_output=True)
         del password
+        if unlocked.returncode: raise RuntimeError('Could not unlock retained signing keychain')
         subprocess.run(['security','list-keychains','-d','user','-s',keychain,*original], check=True)
         identity = subprocess.check_output(['security','find-identity','-v','-p','codesigning',keychain], text=True)
         assert signing['sha1'] in identity
@@ -122,11 +123,13 @@ token = api['make_token']()
 group = api['find_or_create_group'](token,app_id,'Personal Testing')
 holder = api['account_holder'](token)
 assert 'ACCOUNT_HOLDER' in holder['attributes']['roles']
-tester = api['find_or_create_tester'](token,holder)
-api['link'](token,f"/v1/betaGroups/{group['id']}/relationships/betaTesters",'betaTesters',tester['id'],'Add owner')
+members = request('GET',f"/v1/betaGroups/{group['id']}/betaTesters")['data']
+tester = next((row for row in members if row['attributes']['email'] == holder['attributes']['username']), None)
+if tester is None:
+    raise RuntimeError('Add the account holder through App Store Connect > Personal Testing > Add Testers, then use --finalize-only. The public API cannot assign an external tester as an internal user.')
 api['link'](token,f"/v1/betaGroups/{group['id']}/relationships/builds",'builds',build_id,'Add build')
 assert build_id in [row['id'] for row in request('GET',f"/v1/betaGroups/{group['id']}/builds")['data']]
 assert tester['id'] in [row['id'] for row in request('GET',f"/v1/betaGroups/{group['id']}/betaTesters")['data']]
-summary = {'appId':app_id,'version':args.version,'build':args.build,'buildId':build_id,'group':group['attributes']['name'],'notes':verified,'betaState':request('GET',f'/v1/builds/{build_id}/buildBetaDetail')['data']['attributes']}
+summary = {'appId':app_id,'version':args.version,'build':args.build,'buildId':build_id,'group':group['attributes']['name'],'testerState':tester['attributes']['state'],'notes':verified,'betaState':request('GET',f'/v1/builds/{build_id}/buildBetaDetail')['data']['attributes']}
 (work/'release.json').write_text(json.dumps(summary,indent=2))
 print('TestFlight group and notes verified:',work/'release.json',flush=True)
