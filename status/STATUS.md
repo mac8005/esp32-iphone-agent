@@ -13,7 +13,7 @@ Updated: 2026-10-16
 - Verify board identity before flashing and exact build testing notes after upload.
 
 ## Next
-1. Obtain Settings > About > Logs > Export all logs (includes debug.log); Diagnostics > Export traces does not. Diagnose backlog/replay and decoder recovery on user-reported iOS 27.2 beta; repeated mirroring/board resets did not help.
+1. Repair video startup/recovery and stale-frame acceptance; full logs received. On iOS 27.2 beta, background transitions invalidate decoder sessions (-12903); startup snapshot took 167.217 s. Review snapshot/stream replay ordering; do not assume beta-specific cause.
 2. Verify fresh, intact post-action frames and actual phone control before declaring the runtime working.
 
 ## Gotchas
@@ -24,6 +24,7 @@ Updated: 2026-10-16
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-16: Full log confirms 18:55 run waited 167217 ms for snap, starting agent at +177672 ms. USB ok, strong BLE RSSI, model HTTP 200 in 2-3 s. Repeated background decoder invalidation (-12903); earlier snaps ended in BLE disconnect after 84/108 s. No fix deployed yet.
 - 2026-10-16: Checked all upstream issues/comments and PRs. #12 reports a different streaming-with-zero-media bug; no matching fix or confirmed iOS 27.2 regression found. Fork includes latest upstream 9b1a667. Need full log export, not another trace-only ZIP.
 - 2026-10-16: Inspected user trace: first planner record at +180.7 s (request 3.02 s), later reported frame offsets -183.63 to -198.26 s, visible corruption in 006.jpg. Model replies succeed; root transport/decoder trigger remains unproven. No firmware/app fix deployed.
 - 2026-10-16: Released 1.0.1 (1), build 8a7f8276-ffcf-4ac4-b6bf-9c06504712d5. Verified IN_BETA_TESTING, owner membership, and exact en-US/zh-Hans notes; history in .testflight/releases/1.0.1-1.json.
