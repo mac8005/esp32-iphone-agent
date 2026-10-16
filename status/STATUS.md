@@ -2,8 +2,8 @@
 Updated: 2026-10-16
 
 ## In flight
-- Release complete: ESP32 Agent 1.0.1 (1) is IN_BETA_TESTING / Ready to Test for Personal Testing; account holder invited.
-- 1.0.2 (2) repair implemented; 86 simulator tests pass. Signed archive/export passed and Apple accepted upload; processing and TestFlight finalization pending. Physical iOS 27.2 beta validation remains pending.
+- ESP32 Agent 1.0.2 (2) is IN_BETA_TESTING for Personal Testing; exact en-US/zh-Hans notes read back and verified.
+- Video startup/recovery repairs pass all 86 simulator tests. Physical iOS 27.2 beta validation remains pending; firmware unchanged.
 
 ## Decisions
 - Keep provider credentials out of Git; use private internal TestFlight distribution.
@@ -13,8 +13,8 @@ Updated: 2026-10-16
 - Verify board identity before flashing and exact build testing notes after upload.
 
 ## Next
-1. Archive/upload 1.0.2 (2), publish and verify both TestFlight testing languages and internal availability.
-2. Verify fresh, intact post-action frames and actual phone control before declaring the runtime working.
+1. Verify fresh, intact post-action frames and actual phone control on 1.0.2 (2), iOS 27.2 beta.
+2. If video still fails, inspect the new capture-age and bounded-wait diagnostics; do not repeat resets as a repair.
 
 ## Gotchas
 - Internal testers must be added through Apple's web interface; an external betaTester record with the same email cannot be assigned. Future releases reuse the existing internal member.
@@ -24,6 +24,7 @@ Updated: 2026-10-16
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-16: Released 1.0.2 (2), build 1bbaa089-d18d-46df-91a6-b499ffe19a16. Verified IN_BETA_TESTING, Personal Testing membership, and exact en-US/zh-Hans notes. Receipt: .testflight/releases/1.0.2-2.json.
 - 2026-10-16: Apple accepted 1.0.2 (2) upload (delivery 1bbaa089-d18d-46df-91a6-b499ffe19a16). Finalizer resumed using release Python environment; exact notes and internal availability still pending.
 - 2026-10-16: Fixed startup snapshot fallback, stale frame acceptance, reconnect frame retention, and missing-keyframe recovery. Regression tests failed before repair; all 86 tests pass after. Prepared 1.0.2 (2) notes; firmware unchanged.
 - 2026-10-16: Full log confirms 18:55 run waited 167217 ms for snap, starting agent at +177672 ms. USB ok, strong BLE RSSI, model HTTP 200 in 2-3 s. Repeated background decoder invalidation (-12903); earlier snaps ended in BLE disconnect after 84/108 s. No fix deployed yet.
