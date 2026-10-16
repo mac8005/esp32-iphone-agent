@@ -64,6 +64,7 @@ import UIKit
     var lastTask = ""
     var runStarted = Date()
     private var settingsSink: AnyCancellable?
+    private var presetSink: AnyCancellable?
     var videoSink: AnyCancellable?
     var videoDir: URL?
     private(set) lazy var calibrator = AutoCalibrator(app: self)
@@ -105,6 +106,11 @@ import UIKit
             self?.modelResponseSeconds = nil
         }
         board.onVideo = { [weak self] in self?.feed.receive($0) }
+        presetSink = board.$net.sink { [weak self] net in
+            if self?.settings.importBoardPreset(net?.sealedAPIKey) == true {
+                self?.say("Vision model configured from paired board")
+            }
+        }
         board.onStatus = { [weak self] s in
             self?.statusRefreshError = nil
             self?.feed.mirroring = s.ap == "streaming"

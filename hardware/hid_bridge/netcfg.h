@@ -7,6 +7,7 @@
 void net_begin();
 void net_poll();                         // call from loop(): applies a pending `net` write
 String net_json();                       // value of the `net` characteristic
+bool cfg_set_sealed_key(const String &value);  // USB-only provisioning of an encrypted credential
 void net_request(const String &json);    // `net` write; applied by net_poll()
 const char *net_mode();                  // "ap" | "sta" | "none" (station not connected)
 String net_ip();

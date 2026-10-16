@@ -4,6 +4,7 @@
 
 - Personal release preparation for XIAO ESP32-S3 and TestFlight.
 - OpenAI GPT-6 vision support with compatible request parameters and reasoning budget for pointer calibration.
+- Personal vision setup imports an encrypted credential from the paired board into the iPhone Keychain; the provider key is absent from the app package.
 
 - No computer: the ESP32 is the AirPlay receiver (ported from UxPlay) with its own hotspot, and talks to a new
   iPhone app over BLE. The app is the agent: planner/actor loop, pointer calibration, run replay, Live Activity,

@@ -53,6 +53,7 @@ struct NetConfig: Codable, Equatable {
     var ssid: String?
     var pass: String?
     var ip: String?
+    var sealedAPIKey: String?
 }
 
 /// A `reply` notify: `<id> ok [extra]` or `<id> err <reason>`.

@@ -20,6 +20,7 @@
 static Preferences prefs;
 static String apSsid, apPass, staSsid, staPass, mode;  // mode: "ap" | "sta"
 static String pending;
+static String sealedKey;
 static SemaphoreHandle_t pendingLock = xSemaphoreCreateMutex();
 // STA retries back off: a tight reconnect loop starves BLE, which shares the radio.
 static uint32_t retryAt = 0, retryGap = 5000;
@@ -115,6 +116,7 @@ void net_begin() {
   WiFi.onEvent(logWifi);
 #endif
   prefs.begin("agent", false);
+  sealedKey = prefs.getString("sealed_key", "");
   apSsid = prefs.getString("ap_ssid", "");
   apPass = prefs.getString("ap_pass", "");
   if (apSsid.isEmpty() || apPass.length() < 8) {
@@ -194,8 +196,28 @@ void net_poll() {
 
 String net_json() {
   bool sta = mode == "sta";
-  return String("{\"mode\":\"") + mode + "\",\"ssid\":\"" + jsonEsc(sta ? staSsid : apSsid) + "\",\"pass\":\"" +
+  String json = String("{\"mode\":\"") + mode + "\",\"ssid\":\"" + jsonEsc(sta ? staSsid : apSsid) + "\",\"pass\":\"" +
          jsonEsc(sta ? staPass : apPass) + "\",\"ip\":\"" + net_ip() + "\"}";
+  xSemaphoreTake(pendingLock, portMAX_DELAY);
+  String key = sealedKey;
+  xSemaphoreGive(pendingLock);
+  if (key.length() && json.length() + key.length() + 18 <= 512) {
+    json.remove(json.length() - 1);
+    json += ",\"sealedAPIKey\":\"" + key + "\"}";
+  }
+  return json;
+}
+
+bool cfg_set_sealed_key(const String &value) {
+  if (value.length() < 40 || value.length() > 300 || value.length() % 4) return false;
+  for (char c : value) {
+    if (!isalnum((unsigned char)c) && c != '+' && c != '/' && c != '=') return false;
+  }
+  if (prefs.putString("sealed_key", value) != value.length()) return false;
+  xSemaphoreTake(pendingLock, portMAX_DELAY);
+  sealedKey = value;
+  xSemaphoreGive(pendingLock);
+  return true;
 }
 
 const char *net_mode() {

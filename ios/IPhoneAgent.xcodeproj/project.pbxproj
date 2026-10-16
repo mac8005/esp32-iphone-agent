@@ -103,6 +103,7 @@
 		E663D7886455DD700AF2469A /* ModelTestTimingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF50CDAB7D18F16B8D2299C /* ModelTestTimingView.swift */; };
 		E86B4A3177FC9F0A5D846C2F /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB8774D34E5E3FEF5C7A1E6 /* Settings.swift */; };
 		E8FA336F818FBAB651C32BEE /* AgentActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B155ADD97189D634A809EDE9 /* AgentActivity.swift */; };
+		EEB30499B4AB176C9BD0E2C1 /* BoardPresetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09232C5F2585C26842F1E8E9 /* BoardPresetTests.swift */; };
 		EF83C4DFA24497FDB0BF123E /* mock-frame.jpg in Resources */ = {isa = PBXBuildFile; fileRef = F0918D2C621FD17EDD51AF5E /* mock-frame.jpg */; };
 		F0989DBA8FA72168CA371221 /* IslandStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFB37456C763ADFEF9E577A2 /* IslandStatus.swift */; };
 		F0A801D7B4454233734A9494 /* CrashReports.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FB6A431F87BEDCFBF1201C4 /* CrashReports.swift */; };
@@ -150,6 +151,7 @@
 		02C2C2C9EBE006E896050646 /* BoardCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardCommands.swift; sourceTree = "<group>"; };
 		05DA6345A40715C8BD2AED6C /* Notifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifier.swift; sourceTree = "<group>"; };
 		0884D2AF849046D0FA2E62C1 /* StoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreTests.swift; sourceTree = "<group>"; };
+		09232C5F2585C26842F1E8E9 /* BoardPresetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardPresetTests.swift; sourceTree = "<group>"; };
 		0B88A1538529C9674B323370 /* DebugLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugLog.swift; sourceTree = "<group>"; };
 		0DFECC30B2ADEB1BB69072EC /* BoardProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardProtocol.swift; sourceTree = "<group>"; };
 		0FB6A431F87BEDCFBF1201C4 /* CrashReports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrashReports.swift; sourceTree = "<group>"; };
@@ -320,6 +322,7 @@
 			isa = PBXGroup;
 			children = (
 				DCDFF66F3082E46B88130ABC /* AgentTests.swift */,
+				09232C5F2585C26842F1E8E9 /* BoardPresetTests.swift */,
 				23A9A9D917B2B2FC534E7DBA /* DeviceTests.swift */,
 				A54BC007EE5C64A13CDEE9EE /* IslandTests.swift */,
 				F071F3E4D7B82DE70AE75A81 /* LLMTests.swift */,
@@ -629,6 +632,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7D859BE4F1E945FE96CD8C61 /* AgentTests.swift in Sources */,
+				EEB30499B4AB176C9BD0E2C1 /* BoardPresetTests.swift in Sources */,
 				607B1520E654F13F1F304F4D /* DeviceTests.swift in Sources */,
 				2CF6A30C3D72E05EEBC6FFED /* IslandTests.swift in Sources */,
 				48100361D2ECFE7E36F83F9D /* LLMTests.swift in Sources */,
@@ -757,6 +761,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(IA_BUNDLE_ID).activity";
 				PRODUCT_NAME = AgentActivity;
+				PROVISIONING_PROFILE_SPECIFIER = "$(IA_ACTIVITY_PROFILE)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -780,6 +785,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(IA_BUNDLE_ID)";
 				PRODUCT_NAME = IPhoneAgent;
+				PROVISIONING_PROFILE_SPECIFIER = "$(IA_APP_PROFILE)";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -834,6 +840,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(IA_BUNDLE_ID).activity";
 				PRODUCT_NAME = AgentActivity;
+				PROVISIONING_PROFILE_SPECIFIER = "$(IA_ACTIVITY_PROFILE)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -857,6 +864,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(IA_BUNDLE_ID)";
 				PRODUCT_NAME = IPhoneAgent;
+				PROVISIONING_PROFILE_SPECIFIER = "$(IA_APP_PROFILE)";
 				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";

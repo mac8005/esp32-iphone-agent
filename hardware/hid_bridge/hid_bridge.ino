@@ -260,6 +260,12 @@ void loop() {
   if (Serial.available()) {  // USB serial takes the same `<id> <command>` lines, for debugging from a Mac
     line = Serial.readStringUntil('\n');
     line.trim();
+    if (line == "0 status") { Serial.println("0 ok " + statusJson(true)); return; }
+    if (line == "0 config") { Serial.println("0 ok " + net_json()); return; }
+    if (line.startsWith("0 preset ")) {
+      Serial.println(cfg_set_sealed_key(line.substring(9)) ? "0 ok" : "0 err invalid preset");
+      return;
+    }
     if (line.startsWith("0 net ")) { net_request(line.substring(6)); Serial.println("0 ok"); return; }
     int sp = line.indexOf(' ');
     String id = sp < 0 ? line : line.substring(0, sp);

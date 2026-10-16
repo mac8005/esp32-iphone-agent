@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 import NetworkExtension
 import Security
 import UIKit
@@ -11,6 +12,7 @@ import UIKit
     @Published private(set) var provider: ModelProvider = .others
     @Published private(set) var configurationRevision = 0
     private let defaults: UserDefaults
+    private let presetWrappingKey: String?
     @Published var baseURL: String { didSet {
         defaults.set(baseURL, forKey: "baseURL")
         if baseURL != oldValue {
@@ -52,6 +54,7 @@ import UIKit
     /// info: where build-time presets are read from (the app's Info.plist; tests pass none).
     init(defaults: UserDefaults = .standard, info: [String: Any]? = Bundle.main.infoDictionary) {
         self.defaults = defaults
+        presetWrappingKey = info?["IAPresetWrappingKey"] as? String
         let preset = { (key: String) in Self.stored((info?[key] as? String)?.trimmingCharacters(in: .whitespaces)) }
         baseURL = Self.stored(defaults.string(forKey: "baseURL")) ?? preset("IAPresetBaseURL") ?? Self.defaultBaseURL
         model = Self.stored(defaults.string(forKey: "model")) ?? preset("IAPresetModel") ?? Self.defaultModel
@@ -70,6 +73,18 @@ import UIKit
     }
 
     private static func stored(_ v: String?) -> String? { v?.isEmpty == false ? v : nil }
+
+    /// Personal builds unlock the USB-provisioned board credential after encrypted BLE pairing.
+    @discardableResult func importBoardPreset(_ sealed: String?) -> Bool {
+        guard apiKey.isEmpty, baseURL == "https://api.openai.com/v1",
+              let sealed, let combined = Data(base64Encoded: sealed),
+              let presetWrappingKey, let bytes = Data(base64Encoded: presetWrappingKey), bytes.count == 32,
+              let box = try? AES.GCM.SealedBox(combined: combined),
+              let plaintext = try? AES.GCM.open(box, using: SymmetricKey(data: bytes)),
+              let key = String(data: plaintext, encoding: .utf8), key.hasPrefix("sk-"), key.count > 20 else { return false }
+        apiKey = key
+        return true
+    }
 
     /// The endpoint is valid (local endpoints may not require a key).
     var isConfigured: Bool {
