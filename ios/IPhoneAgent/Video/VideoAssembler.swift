@@ -58,7 +58,6 @@ struct VideoAssembler {
         if flags.contains(.start) {
             let key = flags.contains(.idr) || flags.contains(.config)
             if waitingForKey && !key { current = nil; return nil }
-            waitingForKey = false
             guard payload.count >= 4 else { current = nil; return nil }
             let p = [UInt8](payload.prefix(4))
             let ms = UInt32(p[0]) | UInt32(p[1]) << 8 | UInt32(p[2]) << 16 | UInt32(p[3]) << 24
@@ -72,6 +71,7 @@ struct VideoAssembler {
         }
         guard flags.contains(.end) else { return nil }
         defer { current = nil }
+        if current?.idr == true { waitingForKey = false }
         return current
     }
 }

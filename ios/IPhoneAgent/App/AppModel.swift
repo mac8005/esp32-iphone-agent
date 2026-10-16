@@ -176,16 +176,14 @@ import UIKit
             let s = board.status
             DebugLog.write(String(format: "stream: decoded %.1f fps, BLE in %.0f kbps (board %.0f kbps out, AirPlay %.0f kbps %.1f fps), frame age %.1f s, drops %d",
                                   metrics.fps, metrics.bleKbps, s?.ble?.kbps ?? 0, s?.kbps ?? 0, s?.fps ?? 0,
-                                  feed.updated > 0 ? now() - feed.updated : -1, metrics.drops))
+                                  feed.capturedAt > 0 ? now() - feed.capturedAt : -1, metrics.drops))
         }
     }
 
-    /// A command timed out: video may be starving the board's control traffic. Stop the stream and run
-    /// snap-per-step for the rest of this run (the next run streams again).
+    /// Do not amplify a slow control link by transferring the entire video history.
     private func commandTimedOut(_ command: String) async {
-        DebugLog.write("cmd timeout on '\(command.prefix(30))': stream off, snap-per-step for this run")
-        FrameMode.fallback = .snap
-        if feed.streamOn { _ = try? await feed.stream(false) }
+        DebugLog.write("cmd timeout on '\(command.prefix(30))': stopping the run")
+        agent.stop()
     }
 
     func setFrameMode(_ mode: FrameMode) {

@@ -10,6 +10,7 @@ import UIKit
     var aspect: Double { get }
     /// After a gesture that ended at `since`: wait until the screen shows its result (and fetch it, in snap mode).
     func afterAction(since: Double) async
+    func prepareFrame(after: Double) async throws
 }
 
 /// How a run gets its frames: the live stream (`stream on`, the default: a frame in under a second), or one
@@ -17,7 +18,7 @@ import UIKit
 enum FrameMode: String {
     case stream, snap
     static let key = "frameModeV2"  // V2: drops the old saved "snap" left by earlier automatic fallbacks
-    /// A command timeout switches the current run to snap; not saved, so the next run streams again.
+    /// Temporary override, cleared when the next run starts.
     static var fallback: FrameMode?
     static var current: FrameMode {
         get { fallback ?? FrameMode(rawValue: UserDefaults.standard.string(forKey: key) ?? "") ?? .stream }
@@ -26,6 +27,13 @@ enum FrameMode: String {
 }
 
 extension ScreenSource {
+    func prepareFrame(after: Double) async throws {
+        guard live, frame != nil else { throw BlindError() }
+        if capturedAt > 0 && (capturedAt < after || now() - capturedAt > 5) {
+            throw BlindError(reason: "The mirrored screen is delayed. No action was sent.")
+        }
+    }
+
     func afterAction(since: Double) async { await settled() }
 
     /// Wait until the screen stops changing (AirPlay only sends frames on change). Mid-animation frames are big and
@@ -45,7 +53,7 @@ extension ScreenSource {
     func fresh(since: Double, timeout: Double = 0.8) async -> Data? {
         let deadline = now() + timeout
         while (capturedAt > 0 ? capturedAt : updated) <= since {
-            if now() > deadline { return nil }
+            if Task.isCancelled || now() > deadline { return nil }
             try? await Task.sleep(nanoseconds: 20_000_000)
         }
         return frame
@@ -69,6 +77,7 @@ extension ScreenSource {
 
     private var assembler = VideoAssembler()
     private let decoder = H264Decoder()
+    private var generation: UInt64 = 0
 
     init() {
         decoder.onFrame = { [weak self] f in DispatchQueue.main.async { self?.publish(f) } }
@@ -82,7 +91,7 @@ extension ScreenSource {
         }
     }
 
-    var live: Bool { mirroring && frame != nil && (device?.connected ?? false) }
+    var live: Bool { mirroring && frame != nil && !broken && (device?.connected ?? false) }
 
     /// Frame width / height (portrait iPhone as a fallback).
     var aspect: Double { size.width > 0 && size.height > 0 ? size.width / size.height : 9 / 19.5 }
@@ -92,7 +101,10 @@ extension ScreenSource {
         metrics?.videoBytes(chunk.count)
         let dropsBefore = assembler.drops
         let unit = assembler.add(chunk)
-        if assembler.drops > dropsBefore { metrics?.videoDrops(assembler.drops - dropsBefore); broken = true }
+        if assembler.drops > dropsBefore {
+            metrics?.videoDrops(assembler.drops - dropsBefore)
+            resetDecoder(clearConfiguration: false)
+        }
         guard let unit else { return }
         if !unit.snap { boardClock(ms: Int(unit.boardMs)) }  // snap units are resent late: their ages say nothing
         if unit.idr { metrics?.idrSeen() }
@@ -100,7 +112,20 @@ extension ScreenSource {
     }
 
     /// The link (re)connected: chunk numbering starts over.
-    func resetStream() { assembler.reset(); clockOffset = nil }  // the board may have rebooted: its clock too
+    func resetStream() {
+        assembler.reset()
+        clockOffset = nil
+        frame = nil
+        updated = 0
+        capturedAt = 0
+        resetDecoder()
+    }
+
+    private func resetDecoder(clearConfiguration: Bool = true) {
+        generation &+= 1
+        broken = true
+        decoder.queue.async { [decoder] in decoder.reset(clearConfiguration: clearConfiguration) }
+    }
 
     /// A board timestamp (status `up`, or a streamed unit) just arrived: keep the smallest offset.
     func boardClock(ms: Int) {
@@ -111,13 +136,17 @@ extension ScreenSource {
     /// Show a still frame (demo data).
     func show(_ jpeg: Data, width: Int, height: Int) {
         publish(H264Decoder.Frame(jpeg: jpeg, width: width, height: height, decodeMs: 4.2,
-                                  unit: AccessUnit(data: Data(), idr: false, config: false, snap: false, boardMs: 0)))
+                                  unit: AccessUnit(data: Data(), idr: false, config: false, snap: false, boardMs: 0),
+                                  generation: generation))
     }
 
     private func publish(_ f: H264Decoder.Frame) {
+        guard f.generation == generation else { return }
+        let capture = clockOffset.map { Double(f.unit.boardMs) / 1000 + $0 } ?? now()
+        guard capture >= capturedAt else { return }  // replay must not move the visible screen backwards
         frame = f.jpeg
         updated = now()
-        capturedAt = clockOffset.map { Double(f.unit.boardMs) / 1000 + $0 } ?? updated
+        capturedAt = capture
         broken = false
         if size.width != CGFloat(f.width) || size.height != CGFloat(f.height) {
             size = CGSize(width: f.width, height: f.height)
@@ -132,34 +161,44 @@ extension ScreenSource {
     var snapTimeout: Double {
         let gopBytes = Double(metrics?.board?.gop ?? 0)
         let kbps = max(metrics?.bleKbps ?? 0, metrics?.board?.ble?.kbps ?? 0, 40)
-        return max(8, gopBytes * 8 / 1000 / kbps * 2 + 3)
+        return min(30, max(8, gopBytes * 8 / 1000 / kbps * 2 + 3))
     }
 
-    /// A current frame for the model. While the board streams, the live stream has it (an IDR comes every
-    /// ~2 s): use a frame younger than `maxAge`, or wait for the next one. Snap only as a fallback, retried
-    /// once with a longer timeout. Returns where the frame came from, for the log.
+    /// Streaming never requests a second copy of the buffered GOP. A delayed frame must catch up
+    /// within a bounded wait; arrival time is not evidence that its contents are current.
     @discardableResult
-    func currentFrame(maxAge: Double = 1, wait: Double = 3) async throws -> String {
-        if streamOn && mirroring {
-            if frame != nil && now() - updated < maxAge { return "live" }
-            if await fresh(since: now() - maxAge, timeout: wait) != nil { return "live (waited)" }
+    func currentFrame(maxAge: Double = 5, wait: Double = 15, after: Double = 0) async throws -> String {
+        if streamOn {
+            let deadline = now() + wait
+            while true {
+                try Task.checkCancellation()
+                if live && capturedAt >= after && now() - capturedAt <= maxAge { return "live" }
+                if now() >= deadline {
+                    throw BlindError(reason: "The mirrored screen is delayed or cannot be decoded. No action was sent.")
+                }
+                try await Task.sleep(nanoseconds: 50_000_000)
+            }
         }
-        do {
-            try await snap()
-        } catch is BoardTimeout {
-            DebugLog.write("snap timed out; retrying once with a longer timeout")
-            try await snap(timeout: snapTimeout * 1.5)
+        try await snap()
+        guard live, capturedAt >= after, now() - capturedAt <= maxAge else {
+            throw BlindError(reason: "The snapshot is out of date. No action was sent.")
         }
         return "snap"
+    }
+
+    func prepareFrame(after: Double) async throws {
+        try await currentFrame(after: after)
     }
 
     /// Ask the board for the current GOP and wait until it is decoded. Returns the latency in ms.
     @discardableResult
     func snap(timeout: Double? = nil) async throws -> Double {
         guard let device else { throw DeviceError(message: "board not connected") }
+        guard !streamOn else { throw DeviceError(message: "Stop video streaming before requesting a snapshot") }
+        resetDecoder()
         let started = now()
         if let channel = device as? CommandChannel {
-            try await channel.send("snap", timeout: timeout ?? snapTimeout)
+            try await channel.send("snap", timeout: min(timeout ?? snapTimeout, 30))
         } else {
             try await device.send("snap")
         }
@@ -175,42 +214,17 @@ extension ScreenSource {
         streamOn = on
     }
 
-    /// The model must never see a frame from before the action that ended at `since`. Stream: let the screen
-    /// settle, then wait (bounded) for a frame captured after the action; none while the stream is healthy means
-    /// the screen did not change, but a broken stream (waiting for an IDR) needs a snap. Snap: give the UI a moment,
-    /// snap, and snap once more if the GOP still ends before the action.
+    /// Wait for the result of a gesture, never interpret an old frame as an unchanged screen.
     func afterAction(since: Double) async {
         do {
-            if FrameMode.current == .snap {
-                try await Task.sleep(nanoseconds: 700_000_000)
-                try await currentFrame()
-                guard capturedAt < since else { return }
-                DebugLog.write(String(format: "frame: snap ends %.1f s before the action; snapping again", since - capturedAt))
-                try await Task.sleep(nanoseconds: 500_000_000)
-                try await currentFrame()
-            } else {
-                await settled()
-                if await newer(than: since, timeout: 1.5) { return }
-                guard broken || !streamOn else { return DebugLog.write("frame: none after the action; screen unchanged") }
-                DebugLog.write("frame: stream stale (waiting for an IDR); snapping")
-                try await snap()
-            }
+            try await currentFrame(after: since)
         } catch {
+            note = error.localizedDescription
+            broken = true
             DebugLog.write("frame after action failed: \(error.localizedDescription)")
         }
-        if capturedAt < since { DebugLog.write(String(format: "frame: still %.1f s older than the action", since - capturedAt)) }
-    }
-
-    /// Waits until the shown frame was captured after `t`; false on timeout.
-    private func newer(than t: Double, timeout: Double) async -> Bool {
-        let deadline = now() + timeout
-        while capturedAt < t {
-            if now() > deadline { return false }
-            try? await Task.sleep(nanoseconds: 50_000_000)
-        }
-        return true
     }
 
     /// The link dropped: the board forgets `stream on`.
-    func linkLost() { streamOn = false }
+    func linkLost() { streamOn = false; resetStream() }
 }

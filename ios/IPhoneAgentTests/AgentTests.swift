@@ -3,6 +3,17 @@ import XCTest
 
 /// Port of server/tests/test_agent.py.
 @MainActor final class AgentTests: XCTestCase {
+    func testStaleFrameNeverReachesTheModel() async {
+        let model = FakeModel { _ in "1. Tap Search" }
+        let screen = FakeScreen()
+        screen.capturedAt = now() - 180
+        screen.updated = now()
+        let agent = AgentLoop(phone: nil, screen: screen, actor: model, planner: model, trace: nil)
+        do { try await agent.replan(); XCTFail("Expected stale screen rejection") }
+        catch { XCTAssertTrue(error is BlindError) }
+        XCTAssertTrue(model.prompts.isEmpty)
+    }
+
     func testPlannerTimeoutRetriesOnceAndChecksGateAgain() async throws {
         let model = TimeoutModel(failures: 1)
         let agent = AgentLoop(phone: nil, screen: FakeScreen(), actor: model, planner: model, trace: nil)
@@ -12,7 +23,7 @@ import XCTest
         agent.onDoing = { if case .retrying = $0 { retryShown = true } }
         try await agent.replan()
         XCTAssertEqual(model.calls, 2)
-        XCTAssertEqual(gates, 2)
+        XCTAssertEqual(gates, 4)
         XCTAssertTrue(retryShown)
         XCTAssertEqual(agent.plan, "1. Observe the screen")
     }

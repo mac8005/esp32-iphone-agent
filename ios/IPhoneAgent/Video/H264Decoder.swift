@@ -11,6 +11,7 @@ final class H264Decoder: @unchecked Sendable {  // confined to `queue`
         let width: Int, height: Int
         let decodeMs: Double
         let unit: AccessUnit
+        var generation: UInt64 = 0
     }
 
     var onFrame: ((Frame) -> Void)?
@@ -25,8 +26,18 @@ final class H264Decoder: @unchecked Sendable {  // confined to `queue`
     /// the session (e.g. going to background) the GOP is decoded again from here instead of fetched again
     /// over BLE (a snap of a long GOP takes up to a minute).
     private var gop: [AccessUnit] = []
+    private var generation: UInt64 = 0
     private var gopBytes = 0
     private static let gopMax = 64 << 20
+
+    /// Call on the decoder queue when a link or reference frame is lost.
+    func reset(clearConfiguration: Bool = true) {
+        generation &+= 1
+        resetSession()
+        gop = []
+        gopBytes = 0
+        if clearConfiguration { sps = nil; pps = nil }
+    }
 
     /// Decode one access unit (call on `queue`).
     func decode(_ unit: AccessUnit) {
@@ -35,6 +46,8 @@ final class H264Decoder: @unchecked Sendable {  // confined to `queue`
             gop.append(unit)
             gopBytes += unit.data.count
         }
+        // Parameter sets alone cannot repair a broken prediction chain.
+        guard unit.config || unit.idr || !gop.isEmpty else { return }
         let status = decodeOne(unit, emit: true)
         guard status != noErr else { return }
         resetSession()
@@ -74,6 +87,7 @@ final class H264Decoder: @unchecked Sendable {  // confined to `queue`
         }
         guard let sample = makeSample(avcc, format) else { return noErr }
         let started = CFAbsoluteTimeGetCurrent()
+        let frameGeneration = generation
         var flags = VTDecodeInfoFlags()
         let status = VTDecompressionSessionDecodeFrame(session, sampleBuffer: sample, flags: [],
                                                        infoFlagsOut: &flags) { [weak self] status, _, image, _, _ in
@@ -84,7 +98,10 @@ final class H264Decoder: @unchecked Sendable {  // confined to `queue`
             }
             guard emit else { return }
             let ms = (CFAbsoluteTimeGetCurrent() - started) * 1000
-            if let frame = self.jpeg(image, ms: ms, unit: unit) { self.onFrame?(frame) }
+            if var frame = self.jpeg(image, ms: ms, unit: unit) {
+                frame.generation = frameGeneration
+                self.onFrame?(frame)
+            }
         }
         return status
     }

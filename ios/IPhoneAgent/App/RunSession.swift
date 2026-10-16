@@ -75,7 +75,7 @@ extension AppModel {
                 await feed.settled()
                 mark(changed ? "screen changed and settled" : "no screen change seen in 3 s; settled")
             }
-            mark("first frame: " + (try await feed.currentFrame()))
+            mark("first frame: " + (try await feed.currentFrame(after: left)))
             try agent.start(task, traceStarted: true)
             mark("agent started")
             say("started: \(task)")

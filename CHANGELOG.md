@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 (2) — 2026-10-16
+
+- Prevent startup from requesting a long buffered snapshot while live video is streaming.
+- Reject delayed screen images before asking the model; report a video error instead of continuing on outdated screens.
+- Reset video decoding after lost data or reconnection, and wait for a complete keyframe before resuming.
+- Physical validation on iOS 27.2 beta remains required.
+
 ## 1.0.1 (1) — 2026-10-16
 
 - First personal TestFlight release for XIAO ESP32-S3, preconfigured for GPT-6.1 Sol with low reasoning effort.

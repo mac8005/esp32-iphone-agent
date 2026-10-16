@@ -33,8 +33,10 @@ final class VideoTests: XCTestCase {
         XCTAssertNil(a.add(chunk(13, [.end], p)))           // 12 lost: the half unit is dropped
         XCTAssertEqual(a.drops, 1)
         XCTAssertNil(a.add(chunk(14, [.start, .end], p, ms: 3)))  // a P-frame after a gap is useless
-        XCTAssertNotNil(a.add(chunk(15, [.start, .end, .config], sps, ms: 4)))  // recovered on CONFIG
-        XCTAssertNotNil(a.add(chunk(16, [.start, .end], p, ms: 5)))
+        XCTAssertNotNil(a.add(chunk(15, [.start, .end, .config], sps, ms: 4)))  // configuration does not replace the missing reference frame
+        XCTAssertNil(a.add(chunk(16, [.start, .end], p, ms: 5)))
+        XCTAssertNotNil(a.add(chunk(17, [.start, .end, .idr], idr, ms: 6)))
+        XCTAssertNotNil(a.add(chunk(18, [.start, .end], p, ms: 7)))
     }
 
     func testRecoversOnIDRAndWrapsSeq() {
@@ -61,5 +63,33 @@ final class VideoTests: XCTestCase {
         let units = annexBUnits(Data(sps + [0, 0, 1, 0x68, 5] + idr))
         XCTAssertEqual(units.map { $0.first! & 0x1f }, [7, 8, 5])
         XCTAssertEqual(units[0], Data([0x67, 1, 2]))
+    }
+}
+
+@MainActor final class VideoFreshnessTests: XCTestCase {
+    func testRecentlyReceivedOldFrameIsNotCurrentAndDoesNotTriggerSnapshot() async throws {
+        let feed = VideoFeed()
+        let device = FakeDevice()
+        feed.device = device
+        feed.mirroring = true
+        feed.boardClock(ms: 180_000)
+        feed.show(Data([1]), width: 480, height: 1040)
+        try await feed.stream(true)
+        do {
+            try await feed.currentFrame(wait: 0)
+            XCTFail("A newly received three-minute-old frame must not be used")
+        } catch { XCTAssertTrue(error is BlindError) }
+        XCTAssertEqual(device.sent, ["stream on"])
+    }
+
+    func testReconnectClearsThePreviousPhonesFrame() {
+        let feed = VideoFeed()
+        let device = FakeDevice()
+        feed.device = device
+        feed.mirroring = true
+        feed.show(Data([1]), width: 480, height: 1040)
+        feed.resetStream()
+        XCTAssertNil(feed.frame)
+        XCTAssertFalse(feed.live)
     }
 }

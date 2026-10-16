@@ -144,7 +144,9 @@ extension Pointer: Gestures {}
             try await gate?()  // the user may have opened this app while it was paused
         }
         guard let screen, screen.live else { throw BlindError() }  // never let the model act blind
-        let frame = screen.frame, started = now()
+        try await screen.prepareFrame(after: lastActed)
+        try await gate?()  // the user may have reopened the app while the video caught up
+        let frame = screen.frame, captured = screen.capturedAt, started = now()
         onDoing?(retryTimeout ? .waiting : .retrying)
         let reporting = llm as? ModelProgressReporting
         reporting?.onProgress = { [weak self] progress in
@@ -171,7 +173,7 @@ extension Pointer: Gestures {}
         var rec: JObject = ["role": .str(role), "model": .str(llm.model), "prompt": .str(prompt),
                             "reply": .str(reply.text), "seconds": .num(seconds)]
         if let first = reply.firstToken { rec["first_token_s"] = .num((first * 100).rounded() / 100) }
-        if lastActed > 0 { rec["frame_after_action_s"] = .num(((screen.capturedAt - lastActed) * 100).rounded() / 100) }
+        if lastActed > 0 { rec["frame_after_action_s"] = .num(((captured - lastActed) * 100).rounded() / 100) }
         trace?.write(frame, kind: "llm", rec.merging(reply.diagnostics))
         return (reply.text, seconds, frame)
     }
