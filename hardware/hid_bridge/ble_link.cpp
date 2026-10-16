@@ -139,7 +139,12 @@ class CharCb : public NimBLECharacteristicCallbacks {
     char line[CMD_MAX] = {0};
     v.trim();
     strncpy(line, v.c_str(), CMD_MAX - 1);
-    lastCmdMs = millis();
+    const char *command = strchr(line, ' ');
+    if (command) {
+      while (*command == ' ') command++;
+      // Heartbeats and debug relay traffic must not keep video in gesture-throttled mode.
+      if (strcmp(command, "ping") != 0 && strncmp(command, "log ", 4) != 0) lastCmdMs = millis();
+    }
     if (line[0]) xQueueSend(cmdQueue, line, 0);  // full queue: the app times out and retries
   }
   void onRead(NimBLECharacteristic *c, NimBLEConnInfo &ci) override {

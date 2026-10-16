@@ -135,6 +135,25 @@ import XCTest
         XCTAssertEqual(again.span, Pointer.Span(w: 400, h: 800))
     }
 
+    func testFailedCalibrationCannotMoveOrSurviveAsValid() async throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let device = FakeDevice()
+        let pointer = Pointer(device: device, calibrationFile: file)
+        pointer.finishCalibration(x: 0.5, y: 0.25)
+        pointer.setQuality(0.498)  // measured in the failed phone run
+        XCTAssertFalse(pointer.calibrated)
+        XCTAssertFalse(Pointer(device: device, calibrationFile: file).calibrated)
+        do {
+            try await pointer.point(0.5, 0.62)
+            XCTFail("Bad calibration must not send gestures")
+        } catch {}
+        XCTAssertTrue(device.sent.isEmpty)
+        pointer.invalidateCalibration()
+        XCTAssertNil(pointer.span)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+    }
+
     func testModelSettingsNeedOnlyAnEndpoint() {
         let defaults = UserDefaults(suiteName: UUID().uuidString)!
         let settings = Settings(defaults: defaults, info: nil)  // no build-time preset

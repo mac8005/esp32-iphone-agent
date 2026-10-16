@@ -49,7 +49,18 @@ import Foundation
         }
     }
 
-    var calibrated: Bool { span != nil }
+    var calibrated: Bool {
+        span != nil && (quality.map { $0.isFinite && $0 <= AutoCalibrator.tolerance } ?? true)
+    }
+
+    func invalidateCalibration() {
+        span = nil
+        pos = nil
+        quality = nil
+        aspect = nil
+        seen = ["x": [], "y": []]
+        try? FileManager.default.removeItem(at: file)
+    }
 
     private func remember(_ axis: String, _ sample: (Double, Double)) {
         seen[axis] = Array((seen[axis, default: []] + [sample]).suffix(12))  // deque(maxlen=12)

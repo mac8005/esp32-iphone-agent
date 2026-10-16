@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.3 (3) — 2026-10-16
+
+- Begin receiving mirrored video during setup so task startup does not first transfer a long backlog.
+- Keep video diagnostics active during startup and while mirroring.
+- Reject inaccurate calibration checks and previously saved failed calibrations; a missing check click is no longer a success.
+- Companion firmware: keep heartbeat and debug messages from throttling video as if gestures were active.
+- End-to-end operation on iOS 27.2 beta remains unverified.
+
 ## 1.0.2 (2) — 2026-10-16
 
 - Prevent startup from requesting a long buffered snapshot while live video is streaming.

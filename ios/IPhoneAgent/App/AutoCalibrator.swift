@@ -159,6 +159,10 @@ import UIKit
     }
 
     func finished(_ error: Double) {
+        guard error.isFinite, error <= Self.tolerance else {
+            return failed(String(localized: "The pointer missed the check point. Turn off Snap to Item in AssistiveTouch, then calibrate again."))
+        }
+        app.pointer.setQuality(error)
         link = app.board.commands.links
         progress = nil
         problem = nil
@@ -176,6 +180,7 @@ import UIKit
 
     /// The board stays up with the problem, Try Again and "Tap the pointer yourself".
     private func failed(_ why: String) {
+        app.pointer.invalidateCalibration()
         progress = nil
         problem = why
         phase = .failed

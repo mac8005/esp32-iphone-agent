@@ -72,6 +72,7 @@ import UIKit
     private var lastStatus = ""
     private var lastTick = now()
     private var lastStreamLog = 0.0
+    private var warmingStream = false
     private var timers: [Task<Void, Never>] = []
     var backgroundTask: UIBackgroundTaskIdentifier = .invalid
     var lastWidgetReload = 0.0
@@ -117,6 +118,17 @@ import UIKit
             if let up = s.up { self?.feed.boardClock(ms: up) }
             self?.metrics.status(s)
             self?.logStatus(s)
+            // Decode as soon as mirroring begins; waiting until Run buffers a long GOP on the board.
+            if let self, s.ap == "streaming", FrameMode.current == .stream,
+               !MockMode.on, !feed.streamOn, !warmingStream {
+                warmingStream = true
+                Task { [weak self] in
+                    guard let self else { return }
+                    defer { warmingStream = false }
+                    do { try await feed.stream(true) }
+                    catch { DebugLog.write("video warmup failed: \(error.localizedDescription)") }
+                }
+            }
         }
         board.onLinkUp = { [weak self] in
             guard let self else { return }
@@ -171,7 +183,7 @@ import UIKit
         lastTick = now()
         publishWidget()
         if metrics.suspensions > before { DebugLog.write(String(format: "app: resumed after %.0f s suspended", gap)) }
-        if agent.running, now() - lastStreamLog >= 10 {
+        if feed.streamOn || startingAgent || agent.running, now() - lastStreamLog >= 10 {
             lastStreamLog = now()
             let s = board.status
             DebugLog.write(String(format: "stream: decoded %.1f fps, BLE in %.0f kbps (board %.0f kbps out, AirPlay %.0f kbps %.1f fps), frame age %.1f s, drops %d",

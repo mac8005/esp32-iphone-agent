@@ -2,8 +2,10 @@
 Updated: 2026-10-16
 
 ## In flight
-- ESP32 Agent 1.0.2 (2) is IN_BETA_TESTING for Personal Testing; exact en-US/zh-Hans notes read back and verified.
-- Video startup/recovery repairs pass all 86 simulator tests. Physical iOS 27.2 beta validation remains pending; firmware unchanged.
+- 1.0.2 (2) failed on the phone: no current post-Home frame. New logs also show calibration accepted a 49.8% miss.
+- Preparing 1.0.3 (3): receive video during setup, reject bad calibration, include startup video metrics. Simulator tests running.
+- MBA USB board verified; compiling/flashing heartbeat/debug video-throttling repair. NVS preserved.
+- Direct BLE benchmark blocked by macOS Bluetooth permission for diagnostics on MBA; requested permission. iOS 27.2 beta end-to-end success remains unverified.
 
 ## Decisions
 - Keep provider credentials out of Git; use private internal TestFlight distribution.
@@ -13,8 +15,9 @@ Updated: 2026-10-16
 - Verify board identity before flashing and exact build testing notes after upload.
 
 ## Next
-1. Verify fresh, intact post-action frames and actual phone control on 1.0.2 (2), iOS 27.2 beta.
-2. If video still fails, inspect the new capture-age and bounded-wait diagnostics; do not repeat resets as a repair.
+1. Verify firmware flash and serial status; run direct BLE benchmark when MBA permission is granted.
+2. Complete simulator tests and release 1.0.3 (3), including exact localized TestFlight notes readback.
+3. Verify fresh Home frames and real phone actions; do not equate guard failures or upload success with a working agent.
 
 ## Gotchas
 - Internal testers must be added through Apple's web interface; an external betaTester record with the same email cannot be assigned. Future releases reuse the existing internal member.
@@ -24,6 +27,7 @@ Updated: 2026-10-16
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-16: Latest log confirms 49.8% calibration error accepted and startup video stale. Prepared calibration rejection, setup video reception, and firmware heartbeat/debug throttle exemption. MBA USB connected; BLE diagnostics blocked by macOS privacy permission.
 - 2026-10-16: Released 1.0.2 (2), build 1bbaa089-d18d-46df-91a6-b499ffe19a16. Verified IN_BETA_TESTING, Personal Testing membership, and exact en-US/zh-Hans notes. Receipt: .testflight/releases/1.0.2-2.json.
 - 2026-10-16: Apple accepted 1.0.2 (2) upload (delivery 1bbaa089-d18d-46df-91a6-b499ffe19a16). Finalizer resumed using release Python environment; exact notes and internal availability still pending.
 - 2026-10-16: Fixed startup snapshot fallback, stale frame acceptance, reconnect frame retention, and missing-keyframe recovery. Regression tests failed before repair; all 86 tests pass after. Prepared 1.0.2 (2) notes; firmware unchanged.
