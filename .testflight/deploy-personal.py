@@ -28,9 +28,8 @@ for line in (sidepulse / 'config.env').read_text().splitlines():
     if '=' in line and not line.startswith('#'):
         name, value = line.split('=', 1)
         os.environ[name] = os.path.expandvars(os.path.expanduser(shlex.split(value)[0]))
-os.environ['DEVELOPER_DIR'] = '/Volumes/MacMiniData/Developer/Xcode-27.1-rc/Xcode-27.1.0-release.candidate.app/Contents/Developer'
-root = Path('/Volumes/MacMiniData/Developer/esp32-iphone-agent')
-subprocess.run(['/Users/massimo/Git/mac-maintenance/libexec/macmini-data-ready'], check=True)
+os.environ['DEVELOPER_DIR'] = '/Users/massimo/Developer/Xcode-27.1-rc/Xcode-27.1.0-release.candidate.app/Contents/Developer'
+root = Path('/Users/massimo/Developer/esp32-iphone-agent')
 work = root / 'releases' / f'{args.version}-{args.build}'
 if args.finalize_only:
     assert 'UPLOAD SUCCEEDED with no errors' in (work/'upload.log').read_text()
