@@ -1,9 +1,9 @@
 # Status
-Updated: 2026-10-16
+Updated: 2026-10-23
 
 ## In flight
 - ESP32 firmware updated on MBA; upload checksum, USB health and encrypted credential retention verified.
-- ESP32 Agent 1.0.4 (4) IN_BETA_TESTING for Personal Testing; exact en-US/zh-Hans notes read back and verified. Receipt: .testflight/releases/1.0.4-4.json.
+- ESP32 Agent 1.0.5 (5) IN_BETA_TESTING for Personal Testing (upstream MetricKit launch-crash fix + flash.sh port fix); exact en-US/zh-Hans notes verified. Receipt: .testflight/releases/1.0.5-5.json. Firmware unchanged.
 - All 87 simulator tests pass. MBA BLE: 200 kbps idle, 195 kbps with 0.5 s pings, zero gaps, replies 54–145 ms.
 - Physical iOS 27.2 beta success remains unverified. Old calibration with 49.8% error is rejected and requires recalibration; earlier screenshot had Snap to Item on.
 
@@ -15,17 +15,19 @@ Updated: 2026-10-16
 - Verify board identity before flashing and exact build testing notes after upload.
 
 ## Next
-1. Verify accurate calibration with Snap to Item off, fresh Home frames and real phone actions on 1.0.4 (4).
+1. Verify accurate calibration with Snap to Item off, fresh Home frames and real phone actions on 1.0.5 (5).
 2. If still failing, inspect startup video metrics; keep board transport and iOS background decoding evidence separate. Do not claim the agent works from a successful upload or Mac BLE benchmark.
 
 ## Gotchas
 - Internal testers must be added through Apple's web interface; an external betaTester record with the same email cannot be assigned. Future releases reuse the existing internal member.
+- Run deploy-personal.py from a Terminal .command opened in the mini GUI session; over plain SSH the login keychain is locked (security exit 36). Simulator 825CA8B2 is gone; tests use iPhone 17 572A4F80.
 - Resume an uploaded release with .testflight/deploy-personal.py VERSION BUILD --finalize-only.
 - Phone requires cellular data while connected to the board hotspot.
 - Initial Bluetooth, screen mirroring, and AssistiveTouch permissions require interaction on the phone.
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-23: Ported upstream 6dec6a6 (MetricKit launch crash) and 133ead5 (flash port). 87/87 tests pass. Released 1.0.5 (5), build 3caf4c63-bff6-45ab-99d5-5329e5b154e3, IN_BETA_TESTING; notes verified. Other upstream commits (docs, NOTICE, fastlane) not taken.
 - 2026-10-16: Released 1.0.4 (4), build 5e119d9b-c724-407f-8ca9-f598fffd02b3, IN_BETA_TESTING. Personal Testing membership and exact en-US/zh-Hans notes verified. All 87 tests pass; physical iOS 27.2 beta validation pending.
 - 2026-10-16: 1.0.3 (3) IN_BETA_TESTING and en-US/zh-Hans notes verified; receipt saved. Replacement 1.0.4 (4) upload accepted, awaiting Apple processing.
 - 2026-10-16: Replacement 1.0.4 (4), commit 575f6d0, passes all 87 tests. Release pipeline started; no further firmware changes needed.
@@ -40,4 +42,3 @@ Updated: 2026-10-16
 - 2026-10-16: Checked all upstream issues/comments and PRs. #12 reports a different streaming-with-zero-media bug; no matching fix or confirmed iOS 27.2 regression found. Fork includes latest upstream 9b1a667. Need full log export, not another trace-only ZIP.
 - 2026-10-16: Inspected user trace: first planner record at +180.7 s (request 3.02 s), later reported frame offsets -183.63 to -198.26 s, visible corruption in 006.jpg. Model replies succeed; root transport/decoder trigger remains unproven. No firmware/app fix deployed.
 - 2026-10-16: Released 1.0.1 (1), build 8a7f8276-ffcf-4ac4-b6bf-9c06504712d5. Verified IN_BETA_TESTING, owner membership, and exact en-US/zh-Hans notes; history in .testflight/releases/1.0.1-1.json.
-- 2026-10-16: Signed archive/export passed, upload started. Board credential survived restart and decrypted correctly.
