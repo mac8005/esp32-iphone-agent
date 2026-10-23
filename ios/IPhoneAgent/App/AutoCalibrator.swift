@@ -68,9 +68,33 @@ import UIKit
     }
 
     /// Before a run: calibrate if needed and wait for it. True when the pointer is calibrated.
-    func ensureCalibrated() async -> Bool {
+    /// Before every run, while this app is in front: one tap at the check point on the board. The pointer's start
+    /// corner can move between sessions (by 22 points in one log), which an earlier calibration cannot know;
+    /// a miss calibrates again in full. Not calibrated at all: a full calibration.
+    func checkBeforeRun() async -> Bool {
         while busy { try? await Task.sleep(nanoseconds: 200_000_000) }
-        if !app.pointer.calibrated && boardReady { await run(why: String(localized: "before a run")) }
+        guard boardReady, DeviceScreen.foreground, !MockMode.on else { return app.pointer.calibrated }
+        guard app.pointer.calibrated else {
+            await run(why: String(localized: "before a run"))
+            return app.pointer.calibrated
+        }
+        reason = String(localized: "check before a run")
+        problem = nil
+        toast = false
+        openBoard()
+        let job = Task { [weak self] in
+            guard let self else { return }
+            try? await Task.sleep(nanoseconds: 300_000_000)  // the board is up before the click
+            do {
+                if case .done(let error) = try await touchCalibrate(full: false) { return finished(error) }
+            } catch {
+                if Task.isCancelled { return }
+            }
+            await runOnce()
+        }
+        current = job
+        await job.value
+        current = nil
         return app.pointer.calibrated
     }
 

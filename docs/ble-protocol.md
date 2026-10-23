@@ -23,6 +23,9 @@ Existing HID commands, unchanged semantics from the old TCP protocol:
 New:
 - `stream on|off` — continuously forward every access unit over `video` (default off).
 - `snap` — send SPS/PPS + every AU since the last IDR (the current GOP), then reply `ok`.
+- `path X1 Y1 X2 Y2 ...` — one continuous stroke through up to 48 points relative to the pointer's position.
+  `move` and `path` send reports of equal length (10 units, every 8 ms) along a straight line, so iOS's
+  speed-dependent pointer gain is the same everywhere.
 - `vlink` — reply `ok <port> <token>` for the Wi-Fi video path (see below); the token is random per boot.
 - `res W H` — AirPlay resolution advertised in `/info` (default 480 1040), stored in NVS; takes effect on the next mirroring session.
 - `fps N` — max fps advertised (default 5), stored in NVS.

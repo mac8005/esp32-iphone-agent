@@ -1,6 +1,19 @@
 import XCTest
 @testable import IPhoneAgent
 
+/// Firmware before `path`: answers it like an unknown command.
+@MainActor final class NoPathDevice: HIDDevice {
+    var links = 1
+    var connected = true
+    var sent: [String] = []
+    func send(_ command: String) async throws -> String {
+        if command.hasPrefix("path") { throw DeviceError(message: "err unknown command") }
+        sent.append(command)
+        return ""
+    }
+    func waitConnected(_ timeout: TimeInterval) async -> Bool { connected }
+}
+
 /// A board that answers every command like the firmware does.
 @MainActor final class FakeBoard: BoardTransport {
     var isConnected = true
@@ -202,6 +215,31 @@ import XCTest
         device.sent = []
         try await pointer.tap(0.5, 0.5)
         XCTAssertEqual(device.sent.first, "move 200 400")  // from home, not relative to the last run's position
+    }
+
+    /// A drawn stroke goes to the board as one `path` (relative to its start), not one BLE command per point.
+    func testDragIsOneConstantSpeedPathOnTheBoard() async throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let device = FakeDevice()
+        let pointer = Pointer(device: device, calibrationFile: file)
+        pointer.finishCalibration(x: 0.5, y: 0.25)  // span 400 x 800
+        try await pointer.drag([CGPoint(x: 0.1, y: 0.1), CGPoint(x: 0.2, y: 0.2), CGPoint(x: 0.3, y: 0.1)], hold: false)
+        XCTAssertEqual(Array(device.sent.suffix(4)), ["move 40 80", "press", "path 40 80 80 0", "release"])
+    }
+
+    func testDragFallsBackToMovesOnOlderFirmware() async throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let device = NoPathDevice()
+        let pointer = Pointer(device: device, calibrationFile: file)
+        pointer.finishCalibration(x: 0.5, y: 0.25)
+        try await pointer.drag([CGPoint(x: 0.1, y: 0.1), CGPoint(x: 0.2, y: 0.2), CGPoint(x: 0.3, y: 0.1)], hold: false)
+        XCTAssertEqual(Array(device.sent.suffix(4)), ["press", "move 40 80", "move 40 -80", "release"])
+    }
+
+    func testPathTimeoutCoversTheStroke() {
+        XCTAssertEqual(CommandChannel.timeout("path 300 400"), 5 + 500.0 / 10 * 0.008 * 1.5, accuracy: 1e-9)
     }
 
     func testModelSettingsNeedOnlyAnEndpoint() {

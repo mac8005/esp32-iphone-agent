@@ -27,37 +27,55 @@ extension AppModel {
         return false
     }
 
-    /// After a run that ended in another app: bring this one back by searching for it, since iOS lets no app
-    /// bring itself to the front. Search opens with Cmd+Space, or else from the Home Screen with a pull-down.
-    /// Gives up quietly; the Live Activity still shows the result.
+    /// After a run that ended in another app: bring this one back, since iOS lets no app bring itself to the
+    /// front. Built from steps runs do reliably: the board's Home key, a tap on the Home Screen's Search field
+    /// (found by text recognition; else the pull-down), this app's name, then its result (else Return). Each
+    /// look is logged and saved to Documents/return/ for the log export.
     func returnToApp() async {
-        guard inBackground, board.connected, !MockMode.on else { return }
+        guard inBackground, board.connected, pointer.calibrated, !MockMode.on else { return }
         let name = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "ESP32 Agent"
-        for method in ["cmd+space", "home pull-down"] {
-            do {
-                if method == "cmd+space" {
-                    try await pointer.key("cmd+space")
-                } else {
-                    _ = try? await pointer.key("esc")  // close a half-open Search from the first try
-                    try await pointer.goHome()
-                    try await Task.sleep(nanoseconds: 600_000_000)
-                    try await pointer.swipe(0.5, 0.35, 0.5, 0.6, hold: false)
-                }
-                try await Task.sleep(nanoseconds: 700_000_000)
-                try await pointer.type(name)
-                try await Task.sleep(nanoseconds: 900_000_000)
-                try await pointer.key("enter")
-            } catch {
-                DebugLog.write("return to app: \(method) failed: \(error.localizedDescription)")
-                continue
+        do {
+            try await pointer.goHome()
+            try await Task.sleep(nanoseconds: 600_000_000)
+            let home = await look("home")
+            if let search = home.first(where: { s in s.y > 0.5 && ["search", "suchen"].contains { s.text.lowercased().contains($0) } }) {
+                try await pointer.tap(search.x, search.y)
+            } else {
+                try await pointer.swipe(0.5, 0.35, 0.5, 0.6, hold: false)  // pull down on the Home Screen
             }
-            // inactive = iOS is bringing the app forward; it becomes active a moment later
-            for _ in 0..<50 where inBackground {
-                try? await Task.sleep(nanoseconds: 100_000_000)
+            try await Task.sleep(nanoseconds: 800_000_000)
+            try await pointer.key("cmd+a")  // replace an earlier query
+            try await pointer.type(name)
+            try await Task.sleep(nanoseconds: 1_200_000_000)
+            // the query itself shows the name too: the app's result is the top-most match
+            let hits = await look("results").filter { $0.text.lowercased().hasPrefix(name.lowercased()) }.sorted { $0.y < $1.y }
+            if hits.count > 1, let top = hits.first {
+                try await pointer.tap(top.x, top.y)
+            } else {
+                try await pointer.key("enter")  // opens the top hit
             }
-            if !inBackground { return DebugLog.write("return to app: in front after \(method)") }
-            DebugLog.write("return to app: still in background after \(method)")
+        } catch {
+            return DebugLog.write("return to app: \(error.localizedDescription)")
         }
+        // inactive = iOS is bringing the app forward; it becomes active a moment later
+        for _ in 0..<50 where inBackground { try? await Task.sleep(nanoseconds: 100_000_000) }
+        if inBackground { _ = await look("failed") }
+        DebugLog.write("return to app: \(inBackground ? "still in background" : "in front")")
+    }
+
+    /// A fresh frame's texts for returnToApp, logged, with the frame kept in Documents/return/.
+    private func look(_ stage: String) async -> [TextSpot] {
+        _ = try? await feed.currentFrame(wait: 3, catchUp: 5, after: now() - 0.1)
+        guard let frame = feed.frame else {
+            DebugLog.write("return to app: \(stage): no screen")
+            return []
+        }
+        let dir = DebugLog.url.deletingLastPathComponent().appendingPathComponent("return")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        try? frame.write(to: dir.appendingPathComponent("\(stage).jpg"))
+        let spots = await TextSpots.find(frame)
+        DebugLog.write("return to app: \(stage): " + spots.prefix(14).map { String(format: "%@ (%.2f, %.2f)", $0.text, $0.x, $0.y) }.joined(separator: ", "))
+        return spots
     }
 
     /// Neither way worked: ask the user to swipe up, and wait for it (bounded).

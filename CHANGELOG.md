@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.15 (15) — 2026-10-23
+
+- Firmware: every pointer report now moves the same distance along a straight line. Capping each axis separately made diagonal reports faster than straight ones, and iOS scales speed, so x and y were stretched differently per move (fit against 252 recorded calibration taps: per-axis model up to 4% off, report-speed model 0.1–0.6%).
+- Firmware: new `path` command draws a whole stroke on the board at a steady pace; drawings no longer come out distorted by uneven Bluetooth timing. Older firmware falls back to one move per point.
+- Before every run the app taps the check point once on the calibration board; a miss of more than 1.5% recalibrates. The pointer's start corner moved by 22 points between sessions, which made a passing calibration miss later.
+- Aiming runs only after a missed tap again (its pointer detection failed on 3 of 9 taps).
+- Return to app: Home key, tap the Home Screen's Search field (found by text recognition), type the name, tap the app's result. Frames of each step are saved to Documents/return/ for the log export. Cmd+Space removed.
+- Requires the companion firmware update for straight moves and strokes.
+
 ## 1.0.14 (14) — 2026-10-23
 
 - Every tap is aimed: the pointer is found in the live video and corrected before clicking. Open-loop moves missed by up to 8% even right after a passing calibration (e.g. Search pill tapped at 0.58 instead of 0.50).

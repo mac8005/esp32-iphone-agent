@@ -105,6 +105,11 @@ extension BoardTransport {
         let name = parts.first ?? "", arg = parts.count > 1 ? parts[1] : ""
         switch name {
         case "move": return 5 + Double(arg.split(separator: " ").compactMap { Int($0) }.map(abs).max() ?? 0) / 10 * 0.012
+        case "path":  // the stroke's length at 10 units per 8 ms
+            let v = arg.split(separator: " ").compactMap { Double($0) }
+            var length = 0.0, x = 0.0, y = 0.0
+            for i in stride(from: 0, to: v.count - 1, by: 2) { length += hypot(v[i] - x, v[i + 1] - y); (x, y) = (v[i], v[i + 1]) }
+            return 5 + length / 10 * 0.008 * 1.5
         case "type": return 5 + 0.1 * Double(arg.count)
         case "ping": return 8  // an idle check: tolerate a hiccup rather than drop a healthy board
         case "snap": return 15  // a whole GOP over BLE

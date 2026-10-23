@@ -30,7 +30,7 @@ extension AppModel {
             say(String(localized: "Set up the model in Settings first."))
             return
         }
-        guard await calibrator.ensureCalibrated() else {
+        guard await calibrator.checkBeforeRun() else {
             say(String(localized: "The pointer isn't calibrated yet."))
             return
         }

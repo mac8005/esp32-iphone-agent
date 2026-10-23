@@ -18,8 +18,9 @@
 #include "netcfg.h"
 #include "video_link.h"
 #include "src/airplay/airplay.h"
+#include "src/motion/stroke.h"
 
-const int STEP = 10;      // max pointer delta per report while moving
+const int STEP = 10;      // pointer distance per report while moving (constant: see stroke.h)
 const int STEP_MS = 8;    // report interval; constant pace keeps iOS acceleration predictable
 const int HOME_REPORTS = 50;
 #ifndef DEBUG_SERIAL
@@ -34,14 +35,39 @@ USBHIDConsumerControl consumer;
 const uint16_t AC_HOME = 0x0223;  // HID consumer page: AC Home
 static String receiverName = "ESP32 Agent";
 
+const int PATH_POINTS = 48;  // per `path` command (fits CMD_MAX)
+
+static void report(int dx, int dy, void *) {
+  mouse.move(dx, dy);
+  delay(STEP_MS);
+  esp_task_wdt_reset();  // a long stroke must not trip the loop watchdog
+}
+
+// A straight move at a constant speed.
 void movePaced(long dx, long dy) {
-  while (dx || dy) {
-    int sx = constrain(dx, -STEP, STEP), sy = constrain(dy, -STEP, STEP);
-    mouse.move(sx, sy);
-    dx -= sx;
-    dy -= sy;
-    delay(STEP_MS);
+  int pts[4] = {0, 0, (int)dx, (int)dy};
+  stroke_walk(pts, 2, STEP, report, NULL);
+}
+
+// `path X1 Y1 X2 Y2 ...`: one continuous stroke through points relative to where the pointer is, at a
+// constant speed, so a drawn shape keeps its proportions (separate `move`s arrive with uneven BLE gaps).
+String movePath(const String &arg) {
+  static int pts[2 * (PATH_POINTS + 1)];
+  int n = 1;
+  pts[0] = pts[1] = 0;
+  const char *s = arg.c_str();
+  for (char *end; n <= PATH_POINTS; n++) {
+    long x = strtol(s, &end, 10);
+    if (end == s) break;
+    long y = strtol(s = end, &end, 10);
+    if (end == s) return "err usage: path X Y [X Y ...]";
+    s = end;
+    pts[2 * n] = x;
+    pts[2 * n + 1] = y;
   }
+  if (n < 2) return "err usage: path X Y [X Y ...]";
+  stroke_walk(pts, n, STEP, report, NULL);
+  return "ok";
 }
 
 uint8_t keyCode(const String &k) {
@@ -97,6 +123,7 @@ String run(const String &line) {
     return "ok";
   }
   if (cmd == "move") { movePaced(a, b); return "ok"; }
+  if (cmd == "path") return movePath(arg);
   if (cmd == "press") { mouse.press(MOUSE_LEFT); return "ok"; }
   if (cmd == "release") { mouse.release(MOUSE_LEFT); return "ok"; }
   if (cmd == "click") { mouse.press(MOUSE_LEFT); delay(60); mouse.release(MOUSE_LEFT); return "ok"; }

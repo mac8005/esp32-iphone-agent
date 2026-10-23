@@ -4,6 +4,8 @@
 #include <string.h>
 #include "../hid_bridge/src/bplist/bplist.h"
 #include "../hid_bridge/src/video/gop.h"
+#include "../hid_bridge/src/motion/stroke.h"
+#include <math.h>
 
 static int fails;
 #define CHECK(c) do { if (!(c)) { fails++; printf("FAIL %s:%d %s\n", __FILE__, __LINE__, #c); } } while (0)
@@ -145,11 +147,52 @@ static void test_chunker(void) {
   CHECK(vchunk_next(&c, out, 20, 1) == 0);
 }
 
+typedef struct { int n, x, y; double minLen, maxLen, lastLen; } reports;
+static void collect(int dx, int dy, void *ctx) {
+  reports *r = ctx;
+  double len = hypot(dx, dy);
+  if (r->n) {  // every report but the last is checked below
+    if (r->lastLen < r->minLen) r->minLen = r->lastLen;
+    if (r->lastLen > r->maxLen) r->maxLen = r->lastLen;
+  }
+  r->n++, r->x += dx, r->y += dy, r->lastLen = len;
+}
+static reports walk(const int *pts, int n) {
+  reports r = {0, 0, 0, 1e9, 0, 0};
+  stroke_walk(pts, n, 10, collect, &r);
+  return r;
+}
+
+static void test_stroke(void) {
+  // a tap move from home: before, (10,10) reports then (0,10) ones; now every report is ~10 units
+  int tap[] = {0, 0, 100, 358};
+  reports r = walk(tap, 2);
+  CHECK(r.x == 100 && r.y == 358);
+  CHECK(r.n == 38 && r.minLen >= 9 && r.maxLen <= 11 && r.lastLen <= 11);
+  // a short move is one report
+  int nudge[] = {0, 0, 3, -4};
+  r = walk(nudge, 2);
+  CHECK(r.n == 1 && r.x == 3 && r.y == -4);
+  // a closed circle (24 segments of ~8 units) ends exactly where it started, at a steady speed
+  int circle[2 * 25];
+  for (int k = 0; k <= 24; k++) {
+    circle[2 * k] = (int)lround(30 * cos(2 * M_PI * k / 24)) - 30;
+    circle[2 * k + 1] = (int)lround(30 * sin(2 * M_PI * k / 24));
+  }
+  r = walk(circle, 25);
+  CHECK(r.x == 0 && r.y == 0);
+  CHECK(r.minLen >= 8.5 && r.maxLen <= 11);
+  // no motion, a single point
+  int still[] = {0, 0, 0, 0};
+  CHECK(walk(still, 2).n == 0 && walk(still, 1).n == 0);
+}
+
 int main(void) {
   test_bplist_roundtrip();
   test_bplist_utf16();
   test_gop();
   test_chunker();
+  test_stroke();
   printf(fails ? "%d FAILED\n" : "all tests passed\n", fails);
   return fails != 0;
 }

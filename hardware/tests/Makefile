@@ -2,8 +2,8 @@
 SRC = ../hid_bridge/src
 CFLAGS = -std=c11 -Wall -Wextra -g -fsanitize=address,undefined
 
-test: test_main.c $(SRC)/bplist/bplist.c $(SRC)/video/gop.c
-	$(CC) $(CFLAGS) -o $@ $^
+test: test_main.c $(SRC)/bplist/bplist.c $(SRC)/video/gop.c $(SRC)/motion/stroke.c
+	$(CC) $(CFLAGS) -o $@ $^ -lm
 	./test
 
 clean:

@@ -1,0 +1,4 @@
+{
+  "en-US": "Taps and drawings: the pointer now moves at a constant speed along straight lines, so every part of a move is scaled the same way by iOS, and drawings are traced by the board in one continuous stroke. Requires the companion ESP32 firmware update. Before each task the app taps the check point once; if the pointer has shifted, it recalibrates automatically. Aiming now runs only after a missed tap.\n\nReturning to the app: the board goes to the Home Screen, taps Search, types \"ESP32 Agent\" and taps its result. Each step is checked on screen and saved with the logs.\n\nCheck that taps land on the first try, that a drawn smiley keeps its shape, and that the app comes back after a task.",
+  "zh-Hans": "点击与绘图：指针现在沿直线匀速移动，iOS 对移动的每一部分按相同比例缩放；绘图由开发板一次连续完成。需要配套的 ESP32 固件更新。每次任务开始前，应用会先点击一次检查点；如果指针发生偏移，会自动重新校准。现在仅在点击未命中后才进行瞄准。\n\n返回应用：开发板回到主屏幕，点击“搜索”，输入“ESP32 Agent”并点击其结果。每一步都会在屏幕上核对，并随日志保存。\n\n请确认点击第一次就能命中、绘制的笑脸保持形状，以及任务完成后应用会回到前台。"
+}

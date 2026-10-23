@@ -15,6 +15,7 @@ import Foundation
     static let aimTolerance = 0.008         // screen fraction; a bigger miss is corrected before pressing
     static let maxMiss = 0.06               // bigger misses are still corrected, but not learned from
     static let maxCorrection = 0.15         // a bigger "miss" is a misread pointer: tap as aimed
+    static let pathPoints = 40              // points per `path` command (the board takes up to 48)
 
     struct Span: Codable, Equatable { var w: Int, h: Int }
     private struct Saved: Codable { var w: Int, h: Int, seen: [String: [[Double]]]?, quality: Double?, aspect: Double? }
@@ -24,6 +25,7 @@ import Foundation
     private let file: URL
     @Published private(set) var span: Span?  // mouse units needed to cross the full screen width / height
     private var pos: (Int, Int)?  // pointer position in mouse units; nil = unknown
+    private var pathSupported = true  // firmware before `path`: one `move` per point
     private var moves = 0
     private var link = 0  // device.links when the pointer was last homed
     /// where the pointer really landed (seen on screen) for the fraction we aimed at, per axis; a line fit
@@ -289,15 +291,32 @@ import Foundation
         try await point(Double(points[0].x), Double(points[0].y))
         try await device.send("press")
         do {
-            for p in points.dropFirst() {
-                try await moveTo(dx(Double(p.x)), dy(Double(p.y)), rehome: false)  // never home mid-drag
-            }
+            try await stroke(points.dropFirst().map { (dx(Double($0.x)), dy(Double($0.y))) })
             if hold { try await Task.sleep(nanoseconds: UInt64(Self.hold * 1e9)) }
         } catch {
             _ = try? await device.send("release")
             throw error
         }
         try await device.send("release")
+    }
+
+    /// The rest of a pressed stroke: the board walks it at a constant speed (`path`), so a drawn shape keeps its
+    /// proportions; separate `move`s arrive with uneven BLE gaps, and iOS scales each by its speed.
+    private func stroke(_ targets: [(Int, Int)]) async throws {
+        if pathSupported, var from = pos {
+            do {
+                for first in stride(from: 0, to: targets.count, by: Self.pathPoints) {
+                    let part = targets[first..<min(first + Self.pathPoints, targets.count)]
+                    try await device.send("path " + part.map { "\($0.0 - from.0) \($0.1 - from.1)" }.joined(separator: " "))
+                    from = part.last!
+                    pos = from
+                }
+                return
+            } catch let error as DeviceError where error.message.contains("unknown command") {
+                pathSupported = false
+            }
+        }
+        for (x, y) in targets { try await moveTo(x, y, rehome: false) }  // never home mid-drag
     }
 
     func scroll(_ x: Double, _ y: Double, lines: Int) async throws {
