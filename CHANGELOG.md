@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.11 (11) — 2026-10-23
+
+- Finished Live Activities are removed when the app is opened or a new run starts, and on their own after 1 minute instead of 15. Leftovers from earlier launches are cleared too.
+- Returning to the app after a run: if Cmd+Space does not open Search on iPhone, the board goes Home and pulls down to open Search, then types the app name. Each attempt is logged ("return to app: …").
+- No firmware change.
+
 ## 1.0.10 (10) — 2026-10-23
 
 - Fast decisions: on-device text recognition lists the tappable texts on screen, and OpenAI's Decisions API (gpt-6-luna, same API key) picks the next tap. When it is at least 80% sure, the step takes about 1 s instead of 3–5 s.

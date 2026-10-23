@@ -18,6 +18,7 @@ import Foundation
 
     func start(task: String, runID: String, limit: Int, phase: AgentActivityAttributes.Phase = .running) {
         end(nil)
+        clearFinished()
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return DebugLog.write("Live Activity: disabled in Settings") }
         let line = phase == .recording ? String(localized: "Do the task yourself. I'm watching.")
             : String(localized: "Reading the screen…")
@@ -61,7 +62,15 @@ import Foundation
         push(state)
     }
 
-    /// Shows the outcome for a while, then the system removes it. Tapping it opens the review.
+    /// Removes this app's other Live Activities at once: finished runs and leftovers of earlier launches.
+    func clearFinished() {
+        let current = activity?.id
+        for old in Activity<AgentActivityAttributes>.activities where old.id != current {
+            Task { await old.end(nil, dismissalPolicy: .immediate) }
+        }
+    }
+
+    /// Shows the outcome for a minute (or until the app is opened), then it is removed. Tapping it opens the review.
     func end(_ outcome: (mood: Mood, line: String)?) {
         stopDarting()
         flush?.cancel()
@@ -81,7 +90,7 @@ import Foundation
         sent = nil
         Task {
             await activity.end(.init(state: state, staleDate: nil),
-                               dismissalPolicy: outcome == nil ? .immediate : .after(.now + 15 * 60))
+                               dismissalPolicy: outcome == nil ? .immediate : .after(.now + 60))
         }
     }
 

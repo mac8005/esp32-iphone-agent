@@ -1,0 +1,4 @@
+{
+  "en-US": "Finished Live Activities are now cleared when you open the app or start a new run, and disappear on their own after 1 minute instead of 15. Old ones from earlier runs are removed too.\n\nReturning to the app after a task: if Cmd+Space does not open Search on iPhone, the board now goes to the Home Screen, pulls down to open Search, types \"ESP32 Agent\" and presses Return. Includes the 1.0.10 fast decisions. No firmware change.\n\nCheck that the app comes back after a task. If it does not, export the logs; they record each attempt as \"return to app\".",
+  "zh-Hans": "已完成的实时活动现在会在打开应用或开始新任务时清除，并在 1 分钟后自动消失（原为 15 分钟）。之前任务遗留的实时活动也会被移除。\n\n任务完成后返回应用：如果 Cmd+空格在 iPhone 上无法打开搜索，开发板会回到主屏幕并下拉打开搜索，输入“ESP32 Agent”后按回车。包含 1.0.10 的快速决策。无固件变更。\n\n请确认任务完成后应用会回到前台。如果没有，请导出日志；日志会以“return to app”记录每次尝试。"
+}

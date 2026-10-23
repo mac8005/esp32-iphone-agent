@@ -1,0 +1,17 @@
+{
+  "appId": "6823679885",
+  "version": "1.0.10",
+  "build": "10",
+  "buildId": "9df8f81f-fcd1-41e6-bff3-c6fd1b84b7d4",
+  "group": "Personal Testing",
+  "testerState": "INSTALLED",
+  "notes": {
+    "zh-Hans": "\u5feb\u901f\u51b3\u7b56\uff1a\u5e94\u7528\u5728\u8bbe\u5907\u4e0a\u8bc6\u522b\u5c4f\u5e55\u4e0a\u7684\u6587\u5b57\uff0c\u5e76\u4f7f\u7528\u540c\u4e00 API \u5bc6\u94a5\u7531 OpenAI Decisions API \u9009\u62e9\u4e0b\u4e00\u6b21\u70b9\u51fb\u3002\u5f53\u628a\u63e1\u81f3\u5c11\u4e3a 80%\uff08\u4f8b\u5982\u5728\u4e3b\u5c4f\u5e55\u70b9\u51fb\u201c\u8bbe\u7f6e\u201d\u6216\u201c\u641c\u7d22\u201d\uff09\u65f6\uff0c\u6bcf\u4e00\u6b65\u7ea6\u9700 1 \u79d2\uff0c\u800c\u4e0d\u662f 3\u20135 \u79d2\u3002\u8f93\u5165\u6587\u5b57\u3001\u6ed1\u52a8\u3001\u65e0\u6587\u5b57\u56fe\u6807\u548c\u4e0d\u786e\u5b9a\u7684\u9009\u62e9\u4ecd\u4ea4\u7531\u4f60\u914d\u7f6e\u7684\u6a21\u578b\u5904\u7406\uff1bDecisions API \u51fa\u9519\u65f6\uff0c\u4efb\u52a1\u5c06\u4ec5\u4f7f\u7528\u6a21\u578b\u7ee7\u7eed\u3002\u65e0\u56fa\u4ef6\u53d8\u66f4\u3002\n\n\u8bf7\u786e\u8ba4\u6253\u5f00\u201c\u8bbe\u7f6e \u203a Wi-Fi\u201d\u7b49\u4efb\u52a1\u660e\u663e\u66f4\u5feb\uff0c\u4e14\u5feb\u901f\u70b9\u51fb\u547d\u4e2d\u6b63\u786e\u76ee\u6807\u3002\u5feb\u901f\u6b65\u9aa4\u5728\u4efb\u52a1\u6b65\u9aa4\u4e2d\u6807\u6ce8\u4e3a\u201cfast decision\u201d\u3002",
+    "en-US": "Fast decisions: the app reads the texts on screen on the device, and OpenAI's Decisions API picks the next tap with the same API key. When it is at least 80% sure, for example tapping Settings or Search on the Home Screen, a step takes about 1 second instead of 3\u20135. Typing, swiping, icons without text and uncertain choices still go to your configured model. If the Decisions API fails, the run continues with the model alone. No firmware change.\n\nCheck that tasks such as opening Settings \u203a Wi-Fi feel faster and that fast taps hit the right target. Fast steps are labelled \"fast decision\" in the run's steps."
+  },
+  "betaState": {
+    "autoNotifyEnabled": true,
+    "internalBuildState": "IN_BETA_TESTING",
+    "externalBuildState": "NOT_APPLICABLE"
+  }
+}

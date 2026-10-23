@@ -27,25 +27,36 @@ extension AppModel {
         return false
     }
 
-    /// After a run that ended in another app: bring this one back with the board's keyboard (Cmd+Space, its
-    /// name, Return), since iOS lets no app bring itself to the front. Gives up quietly; the Live Activity
-    /// still shows the result.
+    /// After a run that ended in another app: bring this one back by searching for it, since iOS lets no app
+    /// bring itself to the front. Search opens with Cmd+Space, or else from the Home Screen with a pull-down.
+    /// Gives up quietly; the Live Activity still shows the result.
     func returnToApp() async {
         guard inBackground, board.connected, !MockMode.on else { return }
         let name = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "ESP32 Agent"
-        do {
-            try await pointer.key("cmd+space")
-            try await Task.sleep(nanoseconds: 700_000_000)
-            try await pointer.type(name)
-            try await Task.sleep(nanoseconds: 900_000_000)
-            try await pointer.key("enter")
-        } catch {
-            return DebugLog.write("return to app: \(error.localizedDescription)")
+        for method in ["cmd+space", "home pull-down"] {
+            do {
+                if method == "cmd+space" {
+                    try await pointer.key("cmd+space")
+                } else {
+                    _ = try? await pointer.key("esc")  // close a half-open Search from the first try
+                    try await pointer.goHome()
+                    try await Task.sleep(nanoseconds: 600_000_000)
+                    try await pointer.swipe(0.5, 0.35, 0.5, 0.6, hold: false)
+                }
+                try await Task.sleep(nanoseconds: 700_000_000)
+                try await pointer.type(name)
+                try await Task.sleep(nanoseconds: 900_000_000)
+                try await pointer.key("enter")
+            } catch {
+                DebugLog.write("return to app: \(method) failed: \(error.localizedDescription)")
+                continue
+            }
+            for _ in 0..<30 where UIApplication.shared.applicationState != .active {
+                try? await Task.sleep(nanoseconds: 100_000_000)
+            }
+            if UIApplication.shared.applicationState == .active { return DebugLog.write("return to app: in front after \(method)") }
+            DebugLog.write("return to app: still in background after \(method)")
         }
-        for _ in 0..<30 where UIApplication.shared.applicationState != .active {
-            try? await Task.sleep(nanoseconds: 100_000_000)
-        }
-        DebugLog.write("return to app: \(UIApplication.shared.applicationState == .active ? "in front" : "still in background")")
     }
 
     /// Neither way worked: ask the user to swipe up, and wait for it (bounded).
