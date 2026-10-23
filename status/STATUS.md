@@ -3,7 +3,7 @@ Updated: 2026-10-23
 
 ## In flight
 - ESP32 firmware updated on MBA; upload checksum, USB health and encrypted credential retention verified.
-- ESP32 Agent 1.0.9 (9) IN_BETA_TESTING: returns to the app via Spotlight (Cmd+Space, name, Return) when a run ends in another app; includes 1.0.8 calibration fix. Receipt: .testflight/releases/1.0.9-9.json. Return-to-app UNVERIFIED on phone. User reports 1.0.8 works better.
+- ESP32 Agent 1.0.12 (12) IN_BETA_TESTING: 1.0.10 Decisions API fast path (OCR spots, gpt-6-luna choice >= 0.8 conf, actor fallback); 1.0.11 Live Activities cleared on foreground/run start + 60 s dismissal, return-to-app Cmd+Space then Home pull-down fallback; 1.0.12 pointer re-homed at every run start + recalibration before a run when drifted. Receipts in .testflight/releases/. ALL UNVERIFIED on phone; user reported 1.0.9 return-to-app did not work (no log yet).
 - All 87 simulator tests pass. MBA BLE: 200 kbps idle, 195 kbps with 0.5 s pings, zero gaps, replies 54–145 ms.
 - Physical iOS 27.2 beta success remains unverified. Old calibration with 49.8% error is rejected and requires recalibration; earlier screenshot had Snap to Item on.
 
@@ -18,6 +18,7 @@ Updated: 2026-10-23
 - Verify board identity before flashing and exact build testing notes after upload.
 
 ## Next
+1. Get a log export after a finished run on 1.0.12: check "return to app:" lines (which method, if any), "decision:" lines (fast-path hit rate, latency) and tap accuracy across consecutive runs.
 1. On phone with 1.0.7: allow Local Network, check debug log for "video: Wi-Fi link up", run tasks; if the link drops while the agent is in other apps (app suspended), consider keeping it alive or accept BLE fallback.
 1. Verify accurate calibration with Snap to Item off, fresh Home frames and real phone actions on 1.0.6 (6) after recalibrating.
 2. If still failing, inspect startup video metrics; keep board transport and iOS background decoding evidence separate. Do not claim the agent works from a successful upload or Mac BLE benchmark.
@@ -33,6 +34,7 @@ Updated: 2026-10-23
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-23: Released 1.0.10 (fast path, 8f36b23), 1.0.11 (Live Activity clearing + return fallback, 6ad1955), 1.0.12 (re-home per run + drift recalibration, 2bad6ad); 95/95 tests, notes verified each.
 - 2026-10-23: Released 1.0.9 (9) return-to-app (558f758), build 2906badf-3e4e-43cb-9697-8773f8d3cd94, notes verified. Decisions API latency probe done.
 - 2026-10-23: logs 4: Wi-Fi video works; missed taps from failed auto-calibration (residual gate) -> manual fallback. Fixed (e6114a2), 91/91 tests, released 1.0.8 (8) build d3eb5b75-86d5-4e05-acc2-3699495f96e9, notes verified.
 - 2026-10-23: Wi-Fi video server on 7100 stole the AirPlay mirror port (mirroring active, no video). Moved to 7200 (5977709), reflashed + verified on MBA; app unchanged.
@@ -47,4 +49,3 @@ Updated: 2026-10-23
 - 2026-10-16: Firmware checksum and post-flash USB/credential retention verified on MBA. All 87 simulator tests pass; 1.0.3 (3) archive signed successfully and release pipeline running. Commit 868dd47.
 - 2026-10-16: Latest log confirms 49.8% calibration error accepted and startup video stale. Prepared calibration rejection, setup video reception, and firmware heartbeat/debug throttle exemption. MBA USB connected; BLE diagnostics blocked by macOS privacy permission.
 - 2026-10-16: Released 1.0.2 (2), build 1bbaa089-d18d-46df-91a6-b499ffe19a16. Verified IN_BETA_TESTING, Personal Testing membership, and exact en-US/zh-Hans notes. Receipt: .testflight/releases/1.0.2-2.json.
-- 2026-10-16: Apple accepted 1.0.2 (2) upload (delivery 1bbaa089-d18d-46df-91a6-b499ffe19a16). Finalizer resumed using release Python environment; exact notes and internal availability still pending.
