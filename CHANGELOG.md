@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.14 (14) — 2026-10-23
+
+- Every tap is aimed: the pointer is found in the live video and corrected before clicking. Open-loop moves missed by up to 8% even right after a passing calibration (e.g. Search pill tapped at 0.58 instead of 0.50).
+- The pointer re-homes before every gesture, so each move starts from the corner exactly like the calibration probes.
+- Corrections larger than 15% of the screen are treated as a misread pointer and skipped.
+- Return to app: iOS bringing the app forward counts as success (Cmd+Space works on iPhone); no more detour via the Home Screen.
+- No firmware change.
+
 ## 1.0.13 (13) — 2026-10-23
 
 - Fix: starting a task no longer recalibrates first. 1.0.12 treated the pointer's normal offset as drift, so every start recalibrated and a failed calibration blocked the run.

@@ -51,10 +51,11 @@ extension AppModel {
                 DebugLog.write("return to app: \(method) failed: \(error.localizedDescription)")
                 continue
             }
-            for _ in 0..<30 where UIApplication.shared.applicationState != .active {
+            // inactive = iOS is bringing the app forward; it becomes active a moment later
+            for _ in 0..<50 where inBackground {
                 try? await Task.sleep(nanoseconds: 100_000_000)
             }
-            if UIApplication.shared.applicationState == .active { return DebugLog.write("return to app: in front after \(method)") }
+            if !inBackground { return DebugLog.write("return to app: in front after \(method)") }
             DebugLog.write("return to app: still in background after \(method)")
         }
     }

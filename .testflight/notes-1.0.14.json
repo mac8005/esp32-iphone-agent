@@ -1,0 +1,4 @@
+{
+  "en-US": "More accurate taps. Before every tap, the app now finds the pointer in the live video and corrects a miss before clicking, and every move starts from the screen corner exactly like calibration. In 1.0.13, taps missed by up to 8% even right after a successful calibration. Each tap takes about half a second longer, but missed steps cost far more.\n\nReturning to the app after a task now stops after the first attempt that works. Previously the app sometimes went back to the Home Screen and opened again. No firmware change.\n\nCheck that taps hit their targets on the first try, for example Search on the Home Screen and buttons in Notes, and that the app comes back once after a task.",
+  "zh-Hans": "点击更准确：每次点击前，应用会在实时视频中找到指针，并在点击前修正偏差；每次移动都像校准时一样从屏幕角落出发。在 1.0.13 中，即使刚校准成功，点击也可能偏差多达 8%。每次点击约多花半秒，但点错一步的代价要大得多。\n\n任务完成后返回应用时，第一种方式成功后便会停止，不再出现回到主屏幕后又重新打开的情况。无固件变更。\n\n请确认点击第一次就能命中目标（例如主屏幕上的搜索和备忘录中的按钮），以及任务完成后应用只回到前台一次。"
+}

@@ -8,12 +8,13 @@ import Foundation
 @MainActor final class Pointer: ObservableObject {
     static let calibrationMove = 200        // mouse units moved diagonally for a manual (one point) calibration
     static let calibrationStops = [150, 350]  // automatic calibration finds the pointer at these distances
-    static let rehomeEvery = 10             // gestures between re-homing
+    static let rehomeEvery = 1              // gestures between re-homing: every move starts from the corner, like calibration
     static let hold = 0.25                  // s to rest before lifting, so iOS adds no momentum
     static let tapGap = 0.15                // s to stay still after a click, so iOS sees a finished tap
     static let nudge = 12                   // mouse units the pointer is wiggled by to find it on screen
     static let aimTolerance = 0.008         // screen fraction; a bigger miss is corrected before pressing
     static let maxMiss = 0.06               // bigger misses are still corrected, but not learned from
+    static let maxCorrection = 0.15         // a bigger "miss" is a misread pointer: tap as aimed
 
     struct Span: Codable, Equatable { var w: Int, h: Int }
     private struct Saved: Codable { var w: Int, h: Int, seen: [String: [[Double]]]?, quality: Double?, aspect: Double? }
@@ -182,6 +183,9 @@ import Foundation
             save()
         }
         if abs(fx - x) <= Self.aimTolerance && abs(fy - y) <= Self.aimTolerance { return }
+        if max(abs(fx - x), abs(fy - y)) > Self.maxCorrection {
+            return log(String(format: "aim (%.3f, %.3f): pointer seen at (%.3f, %.3f), too far to trust", x, y, fx, fy))
+        }
         let mx = Int(((x - fx) * Double(span.w)).rounded(.toNearestOrEven)), my = Int(((y - fy) * Double(span.h)).rounded(.toNearestOrEven))
         try await device.send("move \(mx) \(my)")  // fix this miss right away
         if let p = pos { pos = (p.0 + mx, p.1 + my) }
