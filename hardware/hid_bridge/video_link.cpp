@@ -12,7 +12,7 @@ const size_t GOP_CAP = 4 * 1024 * 1024;
 const int MAX_AUS = 8192;
 const size_t SCRATCH_CAP = 512 * 1024;   // largest access unit we forward
 const size_t MAX_CHUNK = 512;
-const uint16_t TCP_PORT = 7100;
+const uint16_t TCP_PORT = 7200;  // not 7100: that is AirPlay's mirror stream (AP_MIRROR_PORT)
 const size_t TCP_CHUNK = 1400;  // payload per chunk on the Wi-Fi path
 
 struct Req {

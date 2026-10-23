@@ -58,7 +58,7 @@ board timestamp (ms) for latency stats, followed by the Annex-B data.
 `seq` increments per notify; the app counts gaps as drops and waits for the next IDR/CONFIG after a gap.
 
 ## video over Wi-Fi
-The board listens on TCP `<port>` (7100) at its `ip`. A client sends `<token>\n` within 2 s, then receives
+The board listens on TCP `<port>` (7200; 7100 is the AirPlay mirror stream) at its `ip`. A client sends `<token>\n` within 2 s, then receives
 the same chunks as the `video` notifies, each prefixed with its length (u16 LE), up to 1400 payload bytes.
 While an admitted client is connected, `stream` and `snap` video goes there instead of BLE (one client; a
 new one replaces it). Moving between BLE and Wi-Fi restarts the stream from the GOP's IDR with SPS/PPS.
