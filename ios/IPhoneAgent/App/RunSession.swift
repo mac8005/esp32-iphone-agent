@@ -37,6 +37,7 @@ extension AppModel {
         do {
             agent.actor = try await settings.client("actor")
             agent.planner = try await settings.client("planner")
+            agent.decider = settings.decider()
         } catch {
             say("LLM: \(error.localizedDescription)")
             return

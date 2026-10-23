@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.10 (10) — 2026-10-23
+
+- Fast decisions: on-device text recognition lists the tappable texts on screen, and OpenAI's Decisions API (gpt-6-luna, same API key) picks the next tap. When it is at least 80% sure, the step takes about 1 s instead of 3–5 s.
+- Anything else (typing, swiping, unlabelled icons, uncertain choices) still goes to the configured model. On any Decisions API error, the run continues with the model only.
+- Only with the OpenAI endpoint (api.openai.com). No firmware change.
+
 ## 1.0.9 (9) — 2026-10-23
 
 - When a run ends while another app is in front, the board opens Spotlight (Cmd+Space), types "ESP32 Agent" and presses Return to bring the app back. iOS does not let an app bring itself to the front.

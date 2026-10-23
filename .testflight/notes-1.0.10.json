@@ -1,0 +1,4 @@
+{
+  "en-US": "Fast decisions: the app reads the texts on screen on the device, and OpenAI's Decisions API picks the next tap with the same API key. When it is at least 80% sure, for example tapping Settings or Search on the Home Screen, a step takes about 1 second instead of 3–5. Typing, swiping, icons without text and uncertain choices still go to your configured model. If the Decisions API fails, the run continues with the model alone. No firmware change.\n\nCheck that tasks such as opening Settings › Wi-Fi feel faster and that fast taps hit the right target. Fast steps are labelled \"fast decision\" in the run's steps.",
+  "zh-Hans": "快速决策：应用在设备上识别屏幕上的文字，并使用同一 API 密钥由 OpenAI Decisions API 选择下一次点击。当把握至少为 80%（例如在主屏幕点击“设置”或“搜索”）时，每一步约需 1 秒，而不是 3–5 秒。输入文字、滑动、无文字图标和不确定的选择仍交由你配置的模型处理；Decisions API 出错时，任务将仅使用模型继续。无固件变更。\n\n请确认打开“设置 › Wi-Fi”等任务明显更快，且快速点击命中正确目标。快速步骤在任务步骤中标注为“fast decision”。"
+}

@@ -125,6 +125,52 @@ import XCTest
         XCTAssertTrue(actor.prompts[1].contains("changed nothing"))
     }
 
+    func testConfidentDecisionTapsTheChosenTextWithoutTheActor() async throws {
+        let actor = FakeModel { _ in "THINK: slow\nDO: tap 1 2" }
+        let decider = FakeDecider(("t1", 0.97))
+        let agent = AgentLoop(phone: nil, screen: FakeScreen(), actor: actor, planner: actor, trace: nil)
+        agent.decider = decider
+        agent.findSpots = { _ in [TextSpot(text: "Search", x: 0.5, y: 0.82), TextSpot(text: "Notes — Open", x: 0.3, y: 0.21)] }
+        let acts = try await agent.nextActions()
+        XCTAssertEqual(acts[0].act["action"], .str("tap"))
+        XCTAssertEqual(acts[0].act["x"]?.double, 300)
+        XCTAssertEqual(acts[0].act["y"]?.double, 210)
+        XCTAssertTrue(actor.prompts.isEmpty)
+        XCTAssertEqual(decider.choices.last?.value, "other")
+    }
+
+    func testUnsureOrFailedDecisionFallsBackToTheActor() async throws {
+        let actor = FakeModel { _ in "THINK: look\nDO: tap 1 2" }
+        let agent = AgentLoop(phone: nil, screen: FakeScreen(), actor: actor, planner: actor, trace: nil)
+        agent.findSpots = { _ in [TextSpot(text: "Search", x: 0.5, y: 0.82)] }
+        agent.decider = FakeDecider(("t0", 0.48))
+        _ = try await agent.nextActions()
+        XCTAssertEqual(actor.prompts.count, 1)
+        agent.decider = FakeDecider(("other", 0.99))
+        _ = try await agent.nextActions()
+        XCTAssertEqual(actor.prompts.count, 2)
+        agent.decider = FakeDecider(nil)  // e.g. no access to the endpoint
+        _ = try await agent.nextActions()
+        XCTAssertEqual(actor.prompts.count, 3)
+        XCTAssertNil(agent.decider)  // not asked again this run
+    }
+
+    func testDecisionRequestAndAnswerFormat() throws {
+        let body = DecisionClient.body(context: "Goal: x", image: Data([1, 2]), question: "Which?",
+                                       choices: [(value: "t0", description: "Tap A"), (value: "other", description: "None")])
+        XCTAssertEqual(body["model"] as? String, "gpt-6-luna")
+        let q = (body["questions"] as? [[String: Any]])?.first
+        XCTAssertEqual(q?["type"] as? String, "choice")
+        XCTAssertEqual((q?["choices"] as? [[String: String]])?.map { $0["value"] }, ["t0", "other"])
+        let reply = #"{"answers":[{"type":"choice","name":"next","choice":"t0","confidence":0.99,"probabilities":[]}]}"#
+        let answer = try DecisionClient.answer(Data(reply.utf8))
+        XCTAssertEqual(answer.value, "t0")
+        XCTAssertEqual(answer.confidence, 0.99)
+        XCTAssertNil(DecisionClient(baseURL: "https://openrouter.ai/api/v1", apiKey: "k"))
+        XCTAssertEqual(DecisionClient(baseURL: "https://api.openai.com/v1/", apiKey: "k")?.url.absoluteString,
+                       "https://api.openai.com/v1/decisions")
+    }
+
     func testRepeatingAMoveThatKeepsChangingTheScreenIsNotStuck() {
         let agent = AgentLoop(phone: nil, screen: nil, actor: nil, planner: nil, trace: nil)
         let swipe: JObject = ["action": .str("swipe"), "x1": .int(500), "y1": .int(800), "x2": .int(500), "y2": .int(400)]
@@ -198,6 +244,18 @@ import XCTest
     func chat(system: String, text: String, image: Data?, maxTokens: Int, temperature: Double) async throws -> ChatResult {
         prompts.append(text)
         return ChatResult(text: reply(prompts.count), firstToken: nil, total: 0)
+    }
+}
+
+@MainActor final class FakeDecider: DecisionModel {
+    let answer: (String, Double)?
+    private(set) var choices: [(value: String, description: String)] = []
+    init(_ answer: (String, Double)?) { self.answer = answer }
+    func choose(context: String, image: Data, question: String,
+                choices: [(value: String, description: String)]) async throws -> (value: String, confidence: Double) {
+        self.choices = choices
+        guard let answer else { throw LLMError(message: "HTTP 404") }
+        return answer
     }
 }
 

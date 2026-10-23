@@ -163,6 +163,9 @@ import UIKit
         (try? JSONSerialization.jsonObject(with: Data(extraBody.utf8))) as? [String: Any] ?? [:]
     }
 
+    /// OpenAI's Decisions API for the agent's fast path; nil for any other endpoint.
+    func decider() -> DecisionClient? { DecisionClient(baseURL: baseURL, apiKey: apiKey) }
+
     /// role "planner" or "actor": its own model if set, else the shared one.
     func client(_ role: String) async throws -> LLMClient {
         let own = role == "planner" ? plannerModel : actorModel

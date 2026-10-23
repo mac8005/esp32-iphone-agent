@@ -246,3 +246,64 @@ struct LLMError: LocalizedError {
         part?["reasoning_content"] as? String ?? part?["reasoning"] as? String ?? ""
     }
 }
+
+/// Picks one of the given choices for a screenshot: the chosen value and the model's confidence in it.
+@MainActor protocol DecisionModel: AnyObject {
+    func choose(context: String, image: Data, question: String,
+                choices: [(value: String, description: String)]) async throws -> (value: String, confidence: Double)
+}
+
+/// OpenAI's Decisions API (POST /v1/decisions, gpt-6-luna): a bounded `choice` answer in ~0.5 s instead of a
+/// generated reply. Only OpenAI's own endpoint has it, with the same key.
+@MainActor final class DecisionClient: DecisionModel {
+    static let model = "gpt-6-luna"
+    let url: URL
+    private let apiKey: String
+    private let session: URLSession
+
+    init?(baseURL: String, apiKey: String) {
+        var trimmed = baseURL
+        while trimmed.hasSuffix("/") { trimmed.removeLast() }
+        guard let base = URL(string: trimmed), base.host == "api.openai.com", !apiKey.isEmpty else { return nil }
+        url = base.appendingPathComponent("decisions")
+        self.apiKey = apiKey
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 10  // slower than the actor it replaces is pointless
+        session = URLSession(configuration: config)
+    }
+
+    static func body(context: String, image: Data, question: String,
+                     choices: [(value: String, description: String)]) -> [String: Any] {
+        ["model": model,
+         "input": [["role": "user", "content": [
+            ["type": "input_text", "text": context],
+            ["type": "input_image", "image_url": "data:image/jpeg;base64," + image.base64EncodedString()]]]],
+         "questions": [["type": "choice", "name": "next", "instructions": question,
+                        "choices": choices.map { ["value": $0.value, "description": $0.description] }]]]
+    }
+
+    static func answer(_ data: Data) throws -> (value: String, confidence: Double) {
+        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        guard let first = (json?["answers"] as? [[String: Any]])?.first, first["type"] as? String == "choice",
+              let value = first["choice"] as? String else {
+            throw LLMError(message: "decision: no choice in \(String(decoding: data.prefix(200), as: UTF8.self))")
+        }
+        return (value, (first["confidence"] as? Double) ?? 0)
+    }
+
+    func choose(context: String, image: Data, question: String,
+                choices: [(value: String, description: String)]) async throws -> (value: String, confidence: Double) {
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONSerialization.data(withJSONObject: Self.body(context: context, image: image,
+                                                                                question: question, choices: choices))
+        let (data, response) = try await session.data(for: request)
+        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+        guard (200..<300).contains(status) else {
+            throw LLMError(message: "decision: HTTP \(status) \(String(decoding: data.prefix(200), as: UTF8.self))")
+        }
+        return try Self.answer(data)
+    }
+}

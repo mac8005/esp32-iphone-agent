@@ -31,6 +31,10 @@ extension Pointer: Gestures {}
     let phone: Gestures?
     let screen: ScreenSource?
     var actor: ChatModel?, planner: ChatModel?
+    /// Fast path: picks a tap among the texts on screen; the actor decides whatever it is unsure of.
+    var decider: DecisionModel?
+    var findSpots: (Data) async -> [TextSpot] = TextSpots.find
+    static let decisionConfidence = 0.8
     let trace: TraceStore?
     let maxSteps: Int, maxFailures: Int
     var metrics: Metrics?
@@ -134,8 +138,9 @@ extension Pointer: Gestures {}
         }
     }
 
-    private func ask(_ role: String, _ llm: ChatModel, _ system: String, _ prompt: String,
-                     temperature: Double = 0, retryTimeout: Bool = true) async throws -> (String, Double, Data?) {
+    /// Gate, wait out a lost link and let the video catch up: the prompt (noting a reconnect) and the frame
+    /// a decision may be made on, with its capture time.
+    private func look(_ prompt: String) async throws -> (String, Data?, Double) {
         try await gate?()
         var prompt = prompt
         if let lost = try await waitForScreen() {
@@ -146,7 +151,13 @@ extension Pointer: Gestures {}
         guard let screen, screen.live else { throw BlindError() }  // never let the model act blind
         try await screen.prepareFrame(after: lastActed)
         try await gate?()  // the user may have reopened the app while the video caught up
-        let frame = screen.frame, captured = screen.capturedAt, started = now()
+        return (prompt, screen.frame, screen.capturedAt)
+    }
+
+    private func ask(_ role: String, _ llm: ChatModel, _ system: String, _ prompt: String,
+                     temperature: Double = 0, retryTimeout: Bool = true) async throws -> (String, Double, Data?) {
+        let (prompt, frame, captured) = try await look(prompt)
+        let started = now()
         onDoing?(retryTimeout ? .waiting : .retrying)
         let reporting = llm as? ModelProgressReporting
         reporting?.onProgress = { [weak self] progress in
@@ -330,13 +341,14 @@ extension Pointer: Gestures {}
     func nextActions() async throws -> [Planned] {
         guard let actor else { throw LLMError(message: "no actor model") }
         // actions and their effect only: echoing earlier thoughts makes the model repeat them instead of looking
-        let hidden: Set<String> = ["t", "plan", "plan_zh", "think_s", "act_s", "shot", "thought", "thought_zh", "changed"]
+        let hidden: Set<String> = ["t", "plan", "plan_zh", "think_s", "act_s", "shot", "thought", "thought_zh", "changed", "fast"]
         let history = steps.suffix(8).filter { $0["plan"] == nil }.map { s -> String in
             let effect = s["changed"] == .bool(true) ? " -> screen changed"
                 : s["changed"] == .bool(false) ? " -> screen did NOT change" : ""
             return String(PyJSON.dumps(s.without(hidden)).prefix(300)) + effect
         }.joined(separator: "\n")
         var prompt = "Goal: \(task)\n\nPlan:\n\(plan)\n\nRecent actions:\n\(history.isEmpty ? "(none)" : history)\n\nNext action?"
+        if let decider, !missed, let fast = try await decide(decider, prompt) { return [fast] }
         var reply = ""
         for attempt in 0..<3 {  // retry unparseable replies, a little less deterministically
             let (text, seconds, frame) = try await ask("actor", actor, actorPrompt, prompt, temperature: 0.4 * Double(attempt))
@@ -352,6 +364,42 @@ extension Pointer: Gestures {}
             return acts.map { Planned(act: $0, shot: frame) }
         }
         throw Actions.ParseError(message: "actor gave no valid action: \(reply.prefix(200))")
+    }
+
+    /// Fast path: on-device text recognition proposes taps, the Decisions API picks one (~0.5 s instead of a
+    /// full actor reply). Not confident, not a tap on visible text, or an error: nil, and the actor decides.
+    private func decide(_ decider: DecisionModel, _ prompt: String) async throws -> Planned? {
+        let (context, frame, _) = try await look(prompt)
+        guard let frame else { return nil }
+        let started = now()
+        onDoing?(.thinking)
+        let spots = Array(await findSpots(frame).prefix(80))
+        guard !spots.isEmpty else { return nil }
+        var choices = spots.enumerated().map { i, s in
+            (value: "t\(i)", description: String(format: "Tap \"%@\" at (%.2f, %.2f)", s.text, s.x, s.y))
+        }
+        choices.append((value: "other", description: "None of these: the next step is not a tap on one of these texts "
+                        + "(typing, a key, a swipe, an icon without text, going back or home), or the goal is already achieved."))
+        let answer: (value: String, confidence: Double)
+        do {
+            answer = try await decider.choose(context: context, image: frame,
+                                              question: "Which single tap makes the most progress toward the goal right now?",
+                                              choices: choices)
+        } catch {
+            DebugLog.write("decision failed, actor only for this run: \(error.localizedDescription)")
+            self.decider = nil
+            return nil
+        }
+        let seconds = ((now() - started) * 100).rounded() / 100
+        let index = answer.value.hasPrefix("t") ? Int(answer.value.dropFirst()) : nil
+        let spot = index.flatMap { spots.indices.contains($0) ? spots[$0] : nil }
+        trace?.write(frame, kind: "decision", ["choice": .str(spot?.text ?? answer.value), "confidence": .num(answer.confidence),
+                                               "candidates": .int(spots.count), "seconds": .num(seconds)])
+        DebugLog.write(String(format: "decision: %@ (%.2f) in %.2f s", spot?.text ?? answer.value, answer.confidence, seconds))
+        guard let spot, answer.confidence >= Self.decisionConfidence else { return nil }
+        return Planned(act: ["action": .str("tap"), "x": .int(Int((spot.x * 1000).rounded())), "y": .int(Int((spot.y * 1000).rounded())),
+                             "thought": .str(String(format: "Tap “%@” (fast decision, %.0f%% sure).", spot.text, answer.confidence * 100)),
+                             "think_s": .num(seconds), "fast": .bool(true)], shot: frame)
     }
 
     private func perform(_ a: JObject) async throws {

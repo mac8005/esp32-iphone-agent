@@ -1,6 +1,7 @@
 import CoreGraphics
 import Foundation
 import ImageIO
+import Vision
 
 /// Small image checks on screen frames: did the screen change, and where is the pointer. Port of vision.py.
 enum Vision {
@@ -91,5 +92,28 @@ enum Vision {
         let cx = Double(xs.reduce(0, +)) / Double(hits.count) + Double(left)
         let cy = Double(ys.reduce(0, +)) / Double(hits.count) + Double(top)
         return CGPoint(x: cx / Double(w) - shift / 2, y: cy / Double(h))
+    }
+}
+
+/// A piece of text on a frame and its centre (screen fractions, origin top-left): a candidate tap.
+struct TextSpot: Equatable {
+    var text: String
+    var x: Double, y: Double
+}
+
+enum TextSpots {
+    /// Apple's on-device text recognition (~0.1-0.3 s), off the main thread. The status bar is left out.
+    static func find(_ jpeg: Data) async -> [TextSpot] {
+        await Task.detached(priority: .userInitiated) {
+            let request = VNRecognizeTextRequest()
+            request.recognitionLevel = .accurate
+            request.usesLanguageCorrection = false
+            guard (try? VNImageRequestHandler(data: jpeg).perform([request])) != nil else { return [] }
+            return (request.results ?? []).compactMap { o -> TextSpot? in
+                guard let text = o.topCandidates(1).first?.string.trimmingCharacters(in: .whitespaces), text.count > 1,
+                      1 - o.boundingBox.midY > Vision.topMask else { return nil }
+                return TextSpot(text: text, x: o.boundingBox.midX, y: 1 - o.boundingBox.midY)
+            }
+        }.value
     }
 }
