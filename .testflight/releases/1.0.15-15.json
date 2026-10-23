@@ -1,0 +1,17 @@
+{
+  "appId": "6823679885",
+  "version": "1.0.15",
+  "build": "15",
+  "buildId": "d512ee20-b299-4266-b333-a62498cb7d37",
+  "group": "Personal Testing",
+  "testerState": "INSTALLED",
+  "notes": {
+    "zh-Hans": "\u70b9\u51fb\u4e0e\u7ed8\u56fe\uff1a\u6307\u9488\u73b0\u5728\u6cbf\u76f4\u7ebf\u5300\u901f\u79fb\u52a8\uff0ciOS \u5bf9\u79fb\u52a8\u7684\u6bcf\u4e00\u90e8\u5206\u6309\u76f8\u540c\u6bd4\u4f8b\u7f29\u653e\uff1b\u7ed8\u56fe\u7531\u5f00\u53d1\u677f\u4e00\u6b21\u8fde\u7eed\u5b8c\u6210\u3002\u9700\u8981\u914d\u5957\u7684 ESP32 \u56fa\u4ef6\u66f4\u65b0\u3002\u6bcf\u6b21\u4efb\u52a1\u5f00\u59cb\u524d\uff0c\u5e94\u7528\u4f1a\u5148\u70b9\u51fb\u4e00\u6b21\u68c0\u67e5\u70b9\uff1b\u5982\u679c\u6307\u9488\u53d1\u751f\u504f\u79fb\uff0c\u4f1a\u81ea\u52a8\u91cd\u65b0\u6821\u51c6\u3002\u73b0\u5728\u4ec5\u5728\u70b9\u51fb\u672a\u547d\u4e2d\u540e\u624d\u8fdb\u884c\u7784\u51c6\u3002\n\n\u8fd4\u56de\u5e94\u7528\uff1a\u5f00\u53d1\u677f\u56de\u5230\u4e3b\u5c4f\u5e55\uff0c\u70b9\u51fb\u201c\u641c\u7d22\u201d\uff0c\u8f93\u5165\u201cESP32 Agent\u201d\u5e76\u70b9\u51fb\u5176\u7ed3\u679c\u3002\u6bcf\u4e00\u6b65\u90fd\u4f1a\u5728\u5c4f\u5e55\u4e0a\u6838\u5bf9\uff0c\u5e76\u968f\u65e5\u5fd7\u4fdd\u5b58\u3002\n\n\u8bf7\u786e\u8ba4\u70b9\u51fb\u7b2c\u4e00\u6b21\u5c31\u80fd\u547d\u4e2d\u3001\u7ed8\u5236\u7684\u7b11\u8138\u4fdd\u6301\u5f62\u72b6\uff0c\u4ee5\u53ca\u4efb\u52a1\u5b8c\u6210\u540e\u5e94\u7528\u4f1a\u56de\u5230\u524d\u53f0\u3002",
+    "en-US": "Taps and drawings: the pointer now moves at a constant speed along straight lines, so every part of a move is scaled the same way by iOS, and drawings are traced by the board in one continuous stroke. Requires the companion ESP32 firmware update. Before each task the app taps the check point once; if the pointer has shifted, it recalibrates automatically. Aiming now runs only after a missed tap.\n\nReturning to the app: the board goes to the Home Screen, taps Search, types \"ESP32 Agent\" and taps its result. Each step is checked on screen and saved with the logs.\n\nCheck that taps land on the first try, that a drawn smiley keeps its shape, and that the app comes back after a task."
+  },
+  "betaState": {
+    "autoNotifyEnabled": true,
+    "internalBuildState": "IN_BETA_TESTING",
+    "externalBuildState": "NOT_APPLICABLE"
+  }
+}

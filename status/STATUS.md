@@ -3,11 +3,12 @@ Updated: 2026-10-23
 
 ## In flight
 - ESP32 firmware updated on MBA; upload checksum, USB health and encrypted credential retention verified.
-- ESP32 Agent 1.0.14 (14) IN_BETA_TESTING: aim (closed-loop pointer find + correct) on every tap, re-home before every gesture, corrections >15% skipped; return-to-app counts inactive as success. Receipt .testflight/releases/1.0.14-14.json. Logs 6 (1.0.13) confirmed: Decisions API fast path live (Search 1.00/0.98 in 1.1-2.2 s), return-to-app works (Cmd+Space brought it forward; check misjudged it). Aim accuracy/pointer detection on phone UNVERIFIED.
+- ESP32 Agent 1.0.15 (15) IN_BETA_TESTING + firmware flashed 2026-10-23 (constant-speed straight moves via src/motion/stroke.c, new `path` stroke command; hash verified, NVS config + sealed key kept). App: check tap before every run (recalibrates on >1.5% miss), drags as one `path`, aim only after a miss, return-to-app via Home + OCR Search field + result (frames saved to Documents/return/). Receipt .testflight/releases/1.0.15-15.json. Phone behaviour UNVERIFIED.
 - All 87 simulator tests pass. MBA BLE: 200 kbps idle, 195 kbps with 0.5 s pings, zero gaps, replies 54–145 ms.
 - Physical iOS 27.2 beta success remains unverified. Old calibration with 49.8% error is rejected and requires recalibration; earlier screenshot had Snap to Item on.
 
 ## Decisions
+- Pointer model (fit on 252 probes, scratch analysis 2026-10-23): iOS gain depends on report speed; old per-axis capping gave diagonal reports 14 units vs 10, stretching axes per move (per-axis line residual up to 4%, report-speed model 0.1-0.6%). Firmware now sends equal 10-unit reports along a straight line. Start corner usually (18,18) pt but shifted to (-4,-4) in one session -> check tap before every run.
 - Decisions API candidate (not built): OpenAI POST /v1/decisions, model gpt-6-luna, accepts images, returns choice/predicate/score with confidence (GA 2026-10-22). Probe 2026-10-23 with real screenshots + on-device Vision OCR labels as choices: 420-590 ms vs 2.3-3.6 s actor, picked Search (conf 0.48 vs other 0.47) and Notes result (conf 0.99). Plan: OCR candidates -> Decisions choice; act when confident, else fall back to the current actor. Jev (TypeSafe) is text-only, unusable for screen decisions.
 - 2026-10-23 run breakdown (1.0.7): per step LLM 2.3-3.6 s (TTFT ~2.3 s, 178 KB image), HID 0.4-1.5 s, frame <0.6 s. Waste = missed taps (manual 1-point calibration lacks offset) + iOS stopping mirroring mid-run (~90 s). App already supports separate planner/actor models (Settings.client(role)).
 - Video latency root cause (2026-10-23 log): board forwards every AU in order over BLE (110–135 kbps that day, 200–230 on 10-17); AirPlay bursts of 260–610 kbps at screen transitions queue 20–40 s. App now waits while frames keep advancing (max 90 s). Real fix candidates: lower AirPlay resolution/fps advertised by the board, or raise BLE throughput (Wi-Fi coexistence).
@@ -24,6 +25,8 @@ Updated: 2026-10-23
 2. If still failing, inspect startup video metrics; keep board transport and iOS background decoding evidence separate. Do not claim the agent works from a successful upload or Mac BLE benchmark.
 
 ## Gotchas
+- Release: on the mini write "VERSION BUILD" to ~/Developer/esp32-iphone-agent/release.next, then `open ~/Developer/esp32-iphone-agent/release.command` (GUI session for the keychain); it logs to release-VERSION.log and closes its own Terminal window. Always clean up Terminal windows/temp files on the mini afterwards.
+- Host firmware tests: make -C hardware/tests (stroke walker, GOP, bplist).
 - Open-loop pointer mapping varies between sessions and by move (probe intercept 0.045 vs -0.004; Search tap landed 0.58 vs 0.50 target) - rely on aim, not calibration alone.
 - Cmd+Space opens Search on iPhone; the app passes through .inactive before .active.
 - Pointer.drift includes the probe offset (~4.5% x), so it is always > tolerance after touch-probe calibration; never gate runs on `needed`/drift.
@@ -38,6 +41,7 @@ Updated: 2026-10-23
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-23: logs 7: taps off up to 12% (axis-coupled firmware stepping + shifted start corner), aim unreliable, drawing distorted by per-point BLE timing, return failed. Fixed in firmware (stroke walker + path) and app (2554306); 99/99 iOS + host tests; released 1.0.15 (15) build d512ee20-b299-4266-b333-a62498cb7d37, notes verified; board flashed. Mini release windows cleaned up; release.command self-closes.
 - 2026-10-23: logs 6: missed taps = open-loop error up to 8% after good calibration; return-to-app worked but check misread .inactive. Fixed (d42b7bd), 96/96 tests, released 1.0.14 (14) build bd033083-5a81-4c03-8d42-e17a4c699afb, notes verified.
 - 2026-10-23: logs 5: 1.0.12 recalibrated before every run (drift gate) and video stalled after Wi-Fi switch (drops 131072). Fixed (6dccf5f), 96/96 tests, released 1.0.13 (13) build 6d70ffa9-6474-4072-b61e-b6c768234cd5, notes verified.
 - 2026-10-23: Released 1.0.10 (fast path, 8f36b23), 1.0.11 (Live Activity clearing + return fallback, 6ad1955), 1.0.12 (re-home per run + drift recalibration, 2bad6ad); 95/95 tests, notes verified each.
@@ -52,4 +56,3 @@ Updated: 2026-10-23
 - 2026-10-16: Replacement 1.0.4 (4), commit 575f6d0, passes all 87 tests. Release pipeline started; no further firmware changes needed.
 - 2026-10-16: Final lifecycle review found explicit stream stops after calibration and task completion would replay history on next warmup. Removed these in streaming mode; preparing replacement 1.0.4 (4), tests running.
 - 2026-10-16: Apple accepted 1.0.3 (3). On-board BLE tests pass at 200 kbps idle and 195 kbps with 0.5 s heartbeat traffic, zero gaps, 54–145 ms replies. SSH Bluetooth is denied; launch diagnostics as a Terminal .command via open on MBA.
-- 2026-10-16: Firmware checksum and post-flash USB/credential retention verified on MBA. All 87 simulator tests pass; 1.0.3 (3) archive signed successfully and release pipeline running. Commit 868dd47.
