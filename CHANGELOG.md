@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5 (5) — 2026-10-23
+
+- Fix a launch crash when iOS delivers a crash or hang diagnostic to the app, which could repeat on every launch (upstream 6dec6a6).
+- Firmware flashing script keeps an explicitly given port and follows only the board that re-enumerated after reset (upstream 133ead5). No firmware change; reflashing is not needed.
+- Carries forward the 1.0.4 video and calibration fixes. End-to-end operation on iOS 27.2 beta remains unverified.
+
 ## 1.0.4 (4) — 2026-10-16
 
 - Carries forward the 1.0.3 calibration and video warmup fixes below.

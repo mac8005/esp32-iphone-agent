@@ -1,0 +1,4 @@
+{
+  "en-US": "Fixes a launch crash that occurred when iOS delivered a crash or hang diagnostic to the app; previously one such report could make the app crash on every launch. No ESP32 firmware update is needed, and the paired vision credential and calibration are preserved. Includes all 1.0.4 video and calibration fixes.\n\nCheck that the app opens normally, including after a previous crash, then that calibration passes with Snap to Item disabled and tasks begin acting on a current Home screen. End-to-end operation on iOS 27.2 beta is not yet verified.",
+  "zh-Hans": "修复了 iOS 向应用传递崩溃或卡顿诊断报告时导致的启动崩溃；此前一份此类报告可能使应用每次启动都崩溃。无需更新 ESP32 固件，已配对的视觉模型凭据和校准会保留。包含 1.0.4 的全部视频和校准修复。\n\n请确认应用可以正常打开（包括之前发生过崩溃之后），然后关闭辅助触控的“吸附到项目”，检查校准是否通过，并确认任务能获取当前主屏幕并开始操作。iOS 27.2 beta 的端到端运行尚未验证。"
+}
