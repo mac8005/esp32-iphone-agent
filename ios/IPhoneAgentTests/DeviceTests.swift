@@ -172,6 +172,25 @@ import XCTest
         XCTAssertEqual(y.b + y.a * move[1], 0.62, accuracy: 0.01)
     }
 
+    /// 2026-10-23 phone log: a 2.16% fit residual blocked the check tap, forcing the one-point fallback.
+    func testNoisyProbeFitStillReachesTheCheckTap() async throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let device = FakeDevice()
+        let pointer = Pointer(device: device, calibrationFile: file)
+        let samples: [(ux: Double, uy: Double, fx: Double, fy: Double)] = [
+            (150, 150, 0.742, 0.341), (350, 350, 0.998, 0.852), (51, 114, 0.304, 0.281), (152, 114, 0.809, 0.288),
+            (101, 212, 0.560, 0.507), (51, 310, 0.304, 0.738), (152, 310, 0.819, 0.746)]
+        let x = ProbeFit.line(samples.filter { ProbeFit.usable($0.fx) }.map { ($0.ux, $0.fx) })!
+        let y = ProbeFit.line(samples.filter { ProbeFit.usable($0.fy) }.map { ($0.uy, $0.fy) })!
+        XCTAssertGreaterThan(max(x.rms, y.rms), AutoCalibrator.tolerance)
+        pointer.applyProbe(x: x, y: y, samples: samples)
+        XCTAssertTrue(pointer.calibrated)
+        try await pointer.point(0.5, 0.62)
+        pointer.setQuality(0.04)  // a check tap that misses still invalidates it
+        XCTAssertFalse(pointer.calibrated)
+    }
+
     func testModelSettingsNeedOnlyAnEndpoint() {
         let defaults = UserDefaults(suiteName: UUID().uuidString)!
         let settings = Settings(defaults: defaults, info: nil)  // no build-time preset

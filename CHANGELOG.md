@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.8 (8) — 2026-10-23
+
+- Automatic calibration no longer falls back to the one-point manual tap when the probe fit is slightly noisy; the check tap (within 1.5%) decides. The manual fallback cannot correct the pointer's offset (measured 4.5% horizontally), which made taps miss.
+- Retry the Wi-Fi video link after 5 s instead of 30 s, so runs start on the fast path.
+- No firmware change (Wi-Fi video firmware from 1.0.7 required for the fast path).
+
 ## 1.0.7 (7) — 2026-10-23
 
 - Receive the mirrored screen over the board's Wi-Fi hotspot instead of Bluetooth when the board supports it: about 20–50x more bandwidth, so runs start and react after screen transitions within seconds instead of 20–40 s.

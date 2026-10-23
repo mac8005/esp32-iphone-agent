@@ -247,10 +247,10 @@ import UIKit
     /// Set when one-tap join failed: the user joins in Settings with the shown password.
     @Published var manualHotspot: NetConfig?
 
-    /// Move video to the board's Wi-Fi once the phone mirrors to it; retried every 30 s while down
+    /// Move video to the board's Wi-Fi once the phone mirrors to it; retried every 5 s while down
     /// (older firmware without `vlink`, Local Network access denied, phone not on the hotspot).
     private func linkWiFiVideo(ip: String) {
-        guard !wifiVideo.up, !wifiVideo.connecting, now() - wifiVideoTried > 30 else { return }
+        guard !wifiVideo.up, !wifiVideo.connecting, now() - wifiVideoTried > 5 else { return }
         wifiVideoTried = now()
         Task { [weak self] in
             guard let self else { return }

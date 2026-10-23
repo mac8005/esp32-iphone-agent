@@ -1,0 +1,4 @@
+{
+  "en-US": "Fixes automatic calibration falling back to the manual one-point tap. A slightly noisy probe fit was rejected, and the manual fallback cannot correct the pointer's offset, so taps missed their targets (for example Search or an app icon). The final check tap still requires 1.5% accuracy. Please calibrate again after installing and let it finish automatically.\n\nThe Wi-Fi video link is now retried after 5 seconds instead of 30, so runs start on the fast path. No firmware change.\n\nCheck that calibration passes without asking you to tap the pointer, and that taps land on the first try.",
+  "zh-Hans": "修复自动校准退回到手动单点点击的问题：探测拟合稍有噪声就会被拒绝，而手动校准无法修正指针偏移，导致点击偏离目标（例如搜索或应用图标）。最后的检查点击仍要求 1.5% 的精度。安装后请重新校准，并让其自动完成。\n\nWi-Fi 视频连接现在 5 秒后重试（原为 30 秒），任务可直接使用快速通道开始。无固件变更。\n\n请确认校准无需手动点击指针即可通过，且点击第一次就能命中目标。"
+}

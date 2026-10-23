@@ -137,7 +137,7 @@ import Foundation
     func applyProbe(x: ProbeFit.Line, y: ProbeFit.Line, samples: [(ux: Double, uy: Double, fx: Double, fy: Double)]) {
         let s = Span(w: Int((1 / x.a).rounded()), h: Int((1 / y.a).rounded()))
         span = s
-        (quality, aspect) = (max(x.rms, y.rms), screenAspect())
+        (quality, aspect) = (nil, screenAspect())  // measured by the check tap; the fit residual is not a miss
         seen = ["x": [], "y": []]
         for p in samples {  // a tap stuck at the screen edge says nothing about where the move would have gone
             if ProbeFit.usable(p.fx) { remember("x", (p.ux / Double(s.w), p.fx)) }
