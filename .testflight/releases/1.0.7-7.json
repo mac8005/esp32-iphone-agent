@@ -1,0 +1,17 @@
+{
+  "appId": "6823679885",
+  "version": "1.0.7",
+  "build": "7",
+  "buildId": "5716d9fa-cba3-4420-a6d3-8ffe096eea2d",
+  "group": "Personal Testing",
+  "testerState": "INSTALLED",
+  "notes": {
+    "zh-Hans": "\u955c\u50cf\u5c4f\u5e55\u73b0\u901a\u8fc7\u5f00\u53d1\u677f\u7684 Wi-Fi \u70ed\u70b9\u4f20\u8f93\uff0c\u800c\u4e0d\u662f\u84dd\u7259\uff0c\u5e26\u5bbd\u7ea6\u63d0\u9ad8 20\u201350 \u500d\u3002\u4efb\u52a1\u5e94\u5728\u51e0\u79d2\u5185\u5f00\u59cb\uff0c\u5c4f\u5e55\u5207\u6362\u540e\u4e5f\u80fd\u53ca\u65f6\u8ddf\u4e0a\uff0c\u65e0\u9700\u7b49\u5f85 20\u201340 \u79d2\u3002\u84dd\u7259\u4ecd\u4f5c\u4e3a\u81ea\u52a8\u5907\u7528\u901a\u9053\u3002\n\n\u9700\u8981\u914d\u5957\u7684 ESP32 \u56fa\u4ef6\u66f4\u65b0\uff1b\u672a\u66f4\u65b0\u65f6\u5e94\u7528\u5c06\u50cf 1.0.6 \u4e00\u6837\u7ee7\u7eed\u4f7f\u7528\u84dd\u7259\u3002\u7cfb\u7edf\u8be2\u95ee\u65f6\u8bf7\u5141\u8bb8\u8bbf\u95ee\u672c\u5730\u7f51\u7edc\u3002\n\n\u8bf7\u786e\u8ba4\u4efb\u52a1\uff08\u4f8b\u5982\u6253\u5f00 Wi-Fi \u8bbe\u7f6e\uff09\u80fd\u5feb\u901f\u5f00\u59cb\uff0c\u4e14\u6bcf\u4e00\u6b65\u90fd\u80fd\u53ca\u65f6\u54cd\u5e94\u3002iOS 27.2 beta \u7684\u7aef\u5230\u7aef\u8fd0\u884c\u5c1a\u672a\u9a8c\u8bc1\u3002",
+    "en-US": "The mirrored screen now travels over the board's Wi-Fi hotspot instead of Bluetooth, with roughly 20\u201350x more bandwidth. Runs should start within seconds and keep up after screen transitions instead of waiting 20\u201340 seconds. Bluetooth remains the automatic fallback.\n\nRequires the companion ESP32 firmware update. Without it the app keeps using Bluetooth as in 1.0.6. Allow Local Network access when asked.\n\nCheck that a task such as opening Wi-Fi settings starts quickly and that each step reacts promptly. End-to-end operation on iOS 27.2 beta is not yet verified."
+  },
+  "betaState": {
+    "autoNotifyEnabled": true,
+    "internalBuildState": "IN_BETA_TESTING",
+    "externalBuildState": "NOT_APPLICABLE"
+  }
+}
