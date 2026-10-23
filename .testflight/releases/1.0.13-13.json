@@ -1,0 +1,17 @@
+{
+  "appId": "6823679885",
+  "version": "1.0.13",
+  "build": "13",
+  "buildId": "6d70ffa9-6474-4072-b61e-b6c768234cd5",
+  "group": "Personal Testing",
+  "testerState": "INSTALLED",
+  "notes": {
+    "zh-Hans": "\u4fee\u590d 1.0.12 \u4e2d\u4efb\u52a1\u65e0\u6cd5\u5f00\u59cb\u7684\u95ee\u9898\uff1a\u6bcf\u6b21\u5f00\u59cb\u4efb\u52a1\u90fd\u4f1a\u91cd\u65b0\u6821\u51c6\uff0c\u6821\u51c6\u5931\u8d25\u65f6\u4efb\u52a1\u4fbf\u4e0d\u4f1a\u8fd0\u884c\u3002\u73b0\u5728\u4ec5\u5728\u4ece\u672a\u6821\u51c6\u8fc7\u65f6\u624d\u4f1a\u5728\u4efb\u52a1\u524d\u6821\u51c6\uff1b\u6bcf\u6b21\u4efb\u52a1\u5f00\u59cb\u65f6\u4ecd\u4f1a\u5c06\u6307\u9488\u590d\u4f4d\u3002\n\n\u540c\u65f6\u4fee\u590d\u89c6\u9891\u4ece\u84dd\u7259\u5207\u6362\u5230 Wi-Fi \u540e\u7acb\u5373\u5361\u4f4f\u7684\u95ee\u9898\uff1a\u5ef6\u8fdf\u5230\u8fbe\u7684\u84dd\u7259\u6570\u636e\u4f1a\u91cd\u7f6e\u89c6\u9891\u89e3\u7801\u5668\uff0c\u76f4\u5230\u4e0b\u4e00\u4e2a\u5173\u952e\u5e27\uff08\u53ef\u80fd\u9700\u8981\u51e0\u5206\u949f\uff09\u3002\u65e0\u56fa\u4ef6\u53d8\u66f4\u3002\n\n\u8bf7\u786e\u8ba4\u5b8c\u6210\u4e00\u6b21\u6821\u51c6\u540e\u4efb\u52a1\u80fd\u7acb\u5373\u5f00\u59cb\u3001\u8fde\u7eed\u591a\u6b21\u4efb\u52a1\u70b9\u51fb\u51c6\u786e\uff0c\u4ee5\u53ca\u4efb\u52a1\u5b8c\u6210\u540e\u5e94\u7528\u662f\u5426\u4f1a\u56de\u5230\u524d\u53f0\u3002",
+    "en-US": "Fixes tasks not starting in 1.0.12. Starting a task triggered a new calibration every time, and if that calibration failed nothing happened. Now the app calibrates before a run only if it has never been calibrated. The pointer is still re-homed at the start of every run.\n\nAlso fixes video stalling right after it switches from Bluetooth to Wi-Fi: late Bluetooth data reset the video decoder until the next keyframe, which can be minutes away. No firmware change.\n\nCheck that a task starts right away after one calibration, that several runs in a row tap accurately, and whether the app comes back after a task."
+  },
+  "betaState": {
+    "autoNotifyEnabled": true,
+    "internalBuildState": "IN_BETA_TESTING",
+    "externalBuildState": "NOT_APPLICABLE"
+  }
+}

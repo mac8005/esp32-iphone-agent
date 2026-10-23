@@ -3,7 +3,7 @@ Updated: 2026-10-23
 
 ## In flight
 - ESP32 firmware updated on MBA; upload checksum, USB health and encrypted credential retention verified.
-- ESP32 Agent 1.0.12 (12) IN_BETA_TESTING: 1.0.10 Decisions API fast path (OCR spots, gpt-6-luna choice >= 0.8 conf, actor fallback); 1.0.11 Live Activities cleared on foreground/run start + 60 s dismissal, return-to-app Cmd+Space then Home pull-down fallback; 1.0.12 pointer re-homed at every run start + recalibration before a run when drifted. Receipts in .testflight/releases/. ALL UNVERIFIED on phone; user reported 1.0.9 return-to-app did not work (no log yet).
+- ESP32 Agent 1.0.13 (13) IN_BETA_TESTING: fixes 1.0.12 regression (pre-run recalibration on every start blocked runs) and video stall after BLE->Wi-Fi switch (late BLE chunks read as 65k drops). Includes fast path (1.0.10), Live Activity clearing + return fallback (1.0.11), per-run re-home (1.0.12). Receipt .testflight/releases/1.0.13-13.json. Return-to-app and fast path still UNVERIFIED on phone (no run completed in logs 5).
 - All 87 simulator tests pass. MBA BLE: 200 kbps idle, 195 kbps with 0.5 s pings, zero gaps, replies 54–145 ms.
 - Physical iOS 27.2 beta success remains unverified. Old calibration with 49.8% error is rejected and requires recalibration; earlier screenshot had Snap to Item on.
 
@@ -24,6 +24,8 @@ Updated: 2026-10-23
 2. If still failing, inspect startup video metrics; keep board transport and iOS background decoding evidence separate. Do not claim the agent works from a successful upload or Mac BLE benchmark.
 
 ## Gotchas
+- Pointer.drift includes the probe offset (~4.5% x), so it is always > tolerance after touch-probe calibration; never gate runs on `needed`/drift.
+- Probe y is noisy for the same move (0.693-0.745 at uy 311); the 1.5% check tap sometimes misses (3.7% seen).
 - Board TCP ports 7000/7010/7011/7012/7100 belong to AirPlay (src/airplay/ap_internal.h); the Wi-Fi video server is 7200.
 - Build/flash firmware on the MBA from ~/Documents/esp32-iphone-agent (plain copy): rsync hardware/hid_bridge + flash.sh from the mini repo first; arduino-cli is only on the MBA. Board USB port /dev/cu.usbmodem68EE8F5032FC2.
 - Internal testers must be added through Apple's web interface; an external betaTester record with the same email cannot be assigned. Future releases reuse the existing internal member.
@@ -34,6 +36,7 @@ Updated: 2026-10-23
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-23: logs 5: 1.0.12 recalibrated before every run (drift gate) and video stalled after Wi-Fi switch (drops 131072). Fixed (6dccf5f), 96/96 tests, released 1.0.13 (13) build 6d70ffa9-6474-4072-b61e-b6c768234cd5, notes verified.
 - 2026-10-23: Released 1.0.10 (fast path, 8f36b23), 1.0.11 (Live Activity clearing + return fallback, 6ad1955), 1.0.12 (re-home per run + drift recalibration, 2bad6ad); 95/95 tests, notes verified each.
 - 2026-10-23: Released 1.0.9 (9) return-to-app (558f758), build 2906badf-3e4e-43cb-9697-8773f8d3cd94, notes verified. Decisions API latency probe done.
 - 2026-10-23: logs 4: Wi-Fi video works; missed taps from failed auto-calibration (residual gate) -> manual fallback. Fixed (e6114a2), 91/91 tests, released 1.0.8 (8) build d3eb5b75-86d5-4e05-acc2-3699495f96e9, notes verified.
@@ -48,4 +51,3 @@ Updated: 2026-10-23
 - 2026-10-16: Apple accepted 1.0.3 (3). On-board BLE tests pass at 200 kbps idle and 195 kbps with 0.5 s heartbeat traffic, zero gaps, 54–145 ms replies. SSH Bluetooth is denied; launch diagnostics as a Terminal .command via open on MBA.
 - 2026-10-16: Firmware checksum and post-flash USB/credential retention verified on MBA. All 87 simulator tests pass; 1.0.3 (3) archive signed successfully and release pipeline running. Commit 868dd47.
 - 2026-10-16: Latest log confirms 49.8% calibration error accepted and startup video stale. Prepared calibration rejection, setup video reception, and firmware heartbeat/debug throttle exemption. MBA USB connected; BLE diagnostics blocked by macOS privacy permission.
-- 2026-10-16: Released 1.0.2 (2), build 1bbaa089-d18d-46df-91a6-b499ffe19a16. Verified IN_BETA_TESTING, Personal Testing membership, and exact en-US/zh-Hans notes. Receipt: .testflight/releases/1.0.2-2.json.
