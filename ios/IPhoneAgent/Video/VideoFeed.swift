@@ -1,4 +1,5 @@
 import Foundation
+import Network
 import UIKit
 
 /// What the agent and the pointer need from the screen (VideoFeed, or a fake in tests). Port of screen.py.
@@ -234,4 +235,66 @@ extension ScreenSource {
 
     /// The link dropped: the board forgets `stream on`.
     func linkLost() { streamOn = false; resetStream() }
+}
+
+/// Video over the board's Wi-Fi (TCP): the phone is on the board's hotspot for AirPlay anyway, and this is
+/// ~20-50x faster than BLE notifies. Same chunks as `video`, each after a u16 LE length (docs/ble-protocol.md).
+/// While it is up the board sends video only here; when it drops, the board falls back to BLE.
+@MainActor final class VideoSocket {
+    var onChunk: ((Data) -> Void)?
+    private(set) var up = false
+    private var connection: NWConnection?
+    var connecting: Bool { connection != nil && !up }
+
+    func connect(host: String, port: UInt16, token: String) {
+        close()
+        guard let port = NWEndpoint.Port(rawValue: port) else { return }
+        let c = NWConnection(host: NWEndpoint.Host(host), port: port, using: .tcp)
+        connection = c
+        c.stateUpdateHandler = { [weak self] state in
+            MainActor.assumeIsolated {
+                guard let self, self.connection === c else { return }
+                switch state {
+                case .ready:
+                    self.up = true
+                    DebugLog.write("video: Wi-Fi link up (\(host))")
+                case .failed(let error), .waiting(let error):  // waiting: e.g. Local Network access denied
+                    self.closed("\(error)")
+                default: break
+                }
+            }
+        }
+        c.send(content: Data((token + "\n").utf8), completion: .idempotent)
+        c.start(queue: .main)
+        read(c)
+    }
+
+    func close() {
+        connection?.cancel()
+        connection = nil
+        up = false
+    }
+
+    private func closed(_ why: String) {
+        DebugLog.write("video: Wi-Fi link down: \(why)")
+        close()
+    }
+
+    private func read(_ c: NWConnection) {
+        c.receive(minimumIncompleteLength: 2, maximumLength: 2) { [weak self] head, _, _, error in
+            MainActor.assumeIsolated {
+                guard let self, self.connection === c else { return }
+                guard let head, head.count == 2, error == nil else { return self.closed(error.map { "\($0)" } ?? "closed by board") }
+                let n = Int(head[head.startIndex]) | Int(head[head.startIndex + 1]) << 8
+                c.receive(minimumIncompleteLength: n, maximumLength: n) { [weak self] body, _, _, error in
+                    MainActor.assumeIsolated {
+                        guard let self, self.connection === c else { return }
+                        guard let body, body.count == n, error == nil else { return self.closed(error.map { "\($0)" } ?? "closed by board") }
+                        self.onChunk?(Data(body))
+                        self.read(c)
+                    }
+                }
+            }
+        }
+    }
 }

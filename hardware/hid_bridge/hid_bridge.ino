@@ -141,6 +141,7 @@ String board(const String &line, const String &id) {
     return "ok";
   }
   if (cmd == "snap") { video_snap(id); return ""; }  // replies when the GOP is sent
+  if (cmd == "vlink") return "ok " + video_wifi_link();  // Wi-Fi video path: port and per-boot token
   if (cmd == "bench") {
     if (n < 1 || a <= 0 || a > 4096) return "err usage: bench KB (1-4096)";
     video_bench(id, a);

@@ -1,0 +1,4 @@
+{
+  "en-US": "The mirrored screen now travels over the board's Wi-Fi hotspot instead of Bluetooth, with roughly 20–50x more bandwidth. Runs should start within seconds and keep up after screen transitions instead of waiting 20–40 seconds. Bluetooth remains the automatic fallback.\n\nRequires the companion ESP32 firmware update. Without it the app keeps using Bluetooth as in 1.0.6. Allow Local Network access when asked.\n\nCheck that a task such as opening Wi-Fi settings starts quickly and that each step reacts promptly. End-to-end operation on iOS 27.2 beta is not yet verified.",
+  "zh-Hans": "镜像屏幕现通过开发板的 Wi-Fi 热点传输，而不是蓝牙，带宽约提高 20–50 倍。任务应在几秒内开始，屏幕切换后也能及时跟上，无需等待 20–40 秒。蓝牙仍作为自动备用通道。\n\n需要配套的 ESP32 固件更新；未更新时应用将像 1.0.6 一样继续使用蓝牙。系统询问时请允许访问本地网络。\n\n请确认任务（例如打开 Wi-Fi 设置）能快速开始，且每一步都能及时响应。iOS 27.2 beta 的端到端运行尚未验证。"
+}

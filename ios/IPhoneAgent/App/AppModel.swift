@@ -73,6 +73,8 @@ import UIKit
     private var lastTick = now()
     private var lastStreamLog = 0.0
     private var warmingStream = false
+    let wifiVideo = VideoSocket()
+    private var wifiVideoTried = 0.0
     private var timers: [Task<Void, Never>] = []
     var backgroundTask: UIBackgroundTaskIdentifier = .invalid
     var lastWidgetReload = 0.0
@@ -109,6 +111,7 @@ import UIKit
             self?.modelResponseSeconds = nil
         }
         board.onVideo = { [weak self] in self?.feed.receive($0) }
+        wifiVideo.onChunk = { [weak self] in self?.feed.receive($0) }
         presetSink = board.$net.sink { [weak self] net in
             if self?.settings.importBoardPreset(net?.sealedAPIKey) == true {
                 self?.say("Vision model configured from paired board")
@@ -120,6 +123,7 @@ import UIKit
             if let up = s.up { self?.feed.boardClock(ms: up) }
             self?.metrics.status(s)
             self?.logStatus(s)
+            if let self, s.ap == "streaming", let ip = s.ip, !MockMode.on { linkWiFiVideo(ip: ip) }
             // Decode as soon as mirroring begins; waiting until Run buffers a long GOP on the board.
             if let self, s.ap == "streaming", FrameMode.current == .stream,
                !MockMode.on, !feed.streamOn, !warmingStream {
@@ -242,6 +246,23 @@ import UIKit
 
     /// Set when one-tap join failed: the user joins in Settings with the shown password.
     @Published var manualHotspot: NetConfig?
+
+    /// Move video to the board's Wi-Fi once the phone mirrors to it; retried every 30 s while down
+    /// (older firmware without `vlink`, Local Network access denied, phone not on the hotspot).
+    private func linkWiFiVideo(ip: String) {
+        guard !wifiVideo.up, !wifiVideo.connecting, now() - wifiVideoTried > 30 else { return }
+        wifiVideoTried = now()
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let parts = try await board.commands.send("vlink").split(separator: " ")
+                guard parts.count == 2, let port = UInt16(parts[0]) else { throw DeviceError(message: "bad vlink reply") }
+                wifiVideo.connect(host: ip, port: port, token: String(parts[1]))
+            } catch {
+                DebugLog.write("video: no Wi-Fi link: \(error.localizedDescription)")
+            }
+        }
+    }
 
     func bench(kb: Int = 256) async {
         do {

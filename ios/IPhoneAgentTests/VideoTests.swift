@@ -1,3 +1,4 @@
+import Network
 import XCTest
 @testable import IPhoneAgent
 
@@ -99,6 +100,40 @@ final class VideoTests: XCTestCase {
         let source = try await feed.currentFrame(wait: 0.3, catchUp: 5)
         XCTAssertEqual(source, "live")
         XCTAssertEqual(feed.frame, Data([3]))
+    }
+
+    /// A local stand-in for the board's TCP video server: checks the token line, then sends framed chunks.
+    func testWiFiVideoSendsTokenAndDeliversFramedChunks() async throws {
+        let listener = try NWListener(using: .tcp, on: .any)
+        var token = ""
+        listener.newConnectionHandler = { c in
+            c.start(queue: .main)
+            c.receive(minimumIncompleteLength: 1, maximumLength: 64) { data, _, _, _ in
+                token = String(decoding: data ?? Data(), as: UTF8.self)
+                var out = Data()
+                for chunk in [Data([1, 0, 3, 9]), Data(repeating: 7, count: 1400)] {
+                    out.append(contentsOf: [UInt8(chunk.count & 0xff), UInt8(chunk.count >> 8)])
+                    out.append(chunk)
+                }
+                c.send(content: out, completion: .idempotent)
+            }
+        }
+        let ready = expectation(description: "listening")
+        listener.stateUpdateHandler = { if case .ready = $0 { ready.fulfill() } }
+        listener.start(queue: .main)
+        await fulfillment(of: [ready], timeout: 5)
+        defer { listener.cancel() }
+
+        let socket = VideoSocket()
+        var chunks: [Data] = []
+        let got = expectation(description: "two chunks")
+        socket.onChunk = { chunks.append($0); if chunks.count == 2 { got.fulfill() } }
+        socket.connect(host: "127.0.0.1", port: listener.port!.rawValue, token: "abc123")
+        await fulfillment(of: [got], timeout: 5)
+        XCTAssertEqual(token, "abc123\n")
+        XCTAssertEqual(chunks, [Data([1, 0, 3, 9]), Data(repeating: 7, count: 1400)])
+        XCTAssertTrue(socket.up)
+        socket.close()
     }
 
     func testReconnectClearsThePreviousPhonesFrame() {

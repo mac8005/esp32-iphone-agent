@@ -23,6 +23,7 @@ Existing HID commands, unchanged semantics from the old TCP protocol:
 New:
 - `stream on|off` — continuously forward every access unit over `video` (default off).
 - `snap` — send SPS/PPS + every AU since the last IDR (the current GOP), then reply `ok`.
+- `vlink` — reply `ok <port> <token>` for the Wi-Fi video path (see below); the token is random per boot.
 - `res W H` — AirPlay resolution advertised in `/info` (default 480 1040), stored in NVS; takes effect on the next mirroring session.
 - `fps N` — max fps advertised (default 5), stored in NVS.
 - `bench KB` — send KB kilobytes of filler on `video` with the `bench` flag, then reply `ok <ms>`.
@@ -55,6 +56,12 @@ bit4 BENCH (filler, ignore), bit5 SNAP (part of a snap reply).
 Payload is Annex-B (`00 00 00 01` start codes). On a START chunk the first 4 payload bytes are a u32 LE
 board timestamp (ms) for latency stats, followed by the Annex-B data.
 `seq` increments per notify; the app counts gaps as drops and waits for the next IDR/CONFIG after a gap.
+
+## video over Wi-Fi
+The board listens on TCP `<port>` (7100) at its `ip`. A client sends `<token>\n` within 2 s, then receives
+the same chunks as the `video` notifies, each prefixed with its length (u16 LE), up to 1400 payload bytes.
+While an admitted client is connected, `stream` and `snap` video goes there instead of BLE (one client; a
+new one replaces it). Moving between BLE and Wi-Fi restarts the stream from the GOP's IDR with SPS/PPS.
 
 ## net (JSON)
 Read: `{"mode":"ap","ssid":"ESP32Agent-1A2B","pass":"<random 12 chars>","ip":"192.168.4.1"}`

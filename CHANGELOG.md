@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.7 (7) — 2026-10-23
+
+- Receive the mirrored screen over the board's Wi-Fi hotspot instead of Bluetooth when the board supports it: about 20–50x more bandwidth, so runs start and react after screen transitions within seconds instead of 20–40 s.
+- Bluetooth remains the automatic fallback (older firmware, Local Network access denied, Wi-Fi link lost).
+- Asks once for Local Network access.
+- Companion firmware: TCP video server on the hotspot (port 7100, per-boot token read over the bonded Bluetooth link) and `vlink` command.
+- End-to-end operation on iOS 27.2 beta remains unverified.
+
 ## 1.0.6 (6) — 2026-10-23
 
 - Fix calibration always failing at the final check point: a probe tap stuck at the screen edge skewed the horizontal correction by about 12%.
