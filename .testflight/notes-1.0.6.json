@@ -1,0 +1,4 @@
+{
+  "en-US": "Fixes calibration failing at the final check point. A probe tap stuck at the screen edge skewed the horizontal correction by about 12%; edge taps are now ignored. Please recalibrate once after installing.\n\nTasks no longer fail with \"The mirrored screen is delayed\" while the video is still catching up. The app now waits up to 90 seconds as long as newer frames keep arriving, and still never acts on an out-of-date screen, so a run can take longer to start after a screen transition. No ESP32 firmware update is needed.\n\nCheck that calibration passes, then that a task such as opening Wi-Fi settings starts and acts. End-to-end operation on iOS 27.2 beta is not yet verified.",
+  "zh-Hans": "修复校准在最后检查点失败的问题：停在屏幕边缘的探测点击使水平校正偏差约 12%，现已忽略边缘点击。安装后请重新校准一次。\n\n镜像视频仍在追赶时，任务不再报错“镜像屏幕延迟”。只要仍有更新的画面到达，应用最多等待 90 秒，且仍不会根据过时的屏幕操作，因此屏幕切换后任务可能需要更长时间才开始。无需更新 ESP32 固件。\n\n请确认校准能通过，然后确认任务（例如打开 Wi-Fi 设置）能开始并执行操作。iOS 27.2 beta 的端到端运行尚未验证。"
+}

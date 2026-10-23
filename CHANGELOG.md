@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.6 (6) — 2026-10-23
+
+- Fix calibration always failing at the final check point: a probe tap stuck at the screen edge skewed the horizontal correction by about 12%.
+- Wait for delayed mirrored video to catch up (up to 90 s while newer frames keep arriving) instead of failing after 15 s; still never acts on an out-of-date screen.
+- Runs may take longer to begin after a screen transition, because the board's Bluetooth link (about 110–230 kbps) drains AirPlay bursts in order.
+- No firmware change. End-to-end operation on iOS 27.2 beta remains unverified.
+
 ## 1.0.5 (5) — 2026-10-23
 
 - Fix a launch crash when iOS delivers a crash or hang diagnostic to the app, which could repeat on every launch (upstream 6dec6a6).

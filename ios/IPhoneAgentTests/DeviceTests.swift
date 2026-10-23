@@ -154,6 +154,24 @@ import XCTest
         XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
     }
 
+    /// 2026-10-23 phone log: probe 2 stuck at the right edge (0.998) pulled the x correction off by 12%.
+    func testProbeTapStuckAtTheEdgeDoesNotSkewTheCheckMove() async throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let device = FakeDevice()
+        let pointer = Pointer(device: device, calibrationFile: file)
+        let samples: [(ux: Double, uy: Double, fx: Double, fy: Double)] = [
+            (150, 150, 0.809, 0.372), (350, 350, 0.998, 0.841), (46, 98, 0.279, 0.246), (139, 98, 0.745, 0.250),
+            (93, 205, 0.518, 0.491), (46, 311, 0.279, 0.715), (139, 311, 0.753, 0.745)]
+        let x = ProbeFit.line(samples.filter { ProbeFit.usable($0.fx) }.map { ($0.ux, $0.fx) })!
+        let y = ProbeFit.line(samples.filter { ProbeFit.usable($0.fy) }.map { ($0.uy, $0.fy) })!
+        pointer.applyProbe(x: x, y: y, samples: samples)
+        try await pointer.point(0.5, 0.62)
+        let move = device.sent.last!.split(separator: " ").compactMap { Double($0) }
+        XCTAssertEqual(x.b + x.a * move[0], 0.5, accuracy: 0.01)
+        XCTAssertEqual(y.b + y.a * move[1], 0.62, accuracy: 0.01)
+    }
+
     func testModelSettingsNeedOnlyAnEndpoint() {
         let defaults = UserDefaults(suiteName: UUID().uuidString)!
         let settings = Settings(defaults: defaults, info: nil)  // no build-time preset

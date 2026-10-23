@@ -139,9 +139,9 @@ import Foundation
         span = s
         (quality, aspect) = (max(x.rms, y.rms), screenAspect())
         seen = ["x": [], "y": []]
-        for p in samples {
-            remember("x", (p.ux / Double(s.w), p.fx))
-            remember("y", (p.uy / Double(s.h), p.fy))
+        for p in samples {  // a tap stuck at the screen edge says nothing about where the move would have gone
+            if ProbeFit.usable(p.fx) { remember("x", (p.ux / Double(s.w), p.fx)) }
+            if ProbeFit.usable(p.fy) { remember("y", (p.uy / Double(s.h), p.fy)) }
         }
         pos = nil
         save()

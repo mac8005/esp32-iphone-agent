@@ -82,6 +82,25 @@ final class VideoTests: XCTestCase {
         XCTAssertEqual(device.sent, ["stream on"])
     }
 
+    func testDelayedStreamThatKeepsCatchingUpIsWaitedFor() async throws {
+        let feed = VideoFeed()
+        let device = FakeDevice()
+        feed.device = device
+        feed.mirroring = true
+        feed.boardClock(ms: 100_000)
+        feed.show(Data([1]), width: 480, height: 1040, boardMs: 80_000)  // 20 s behind, like a draining burst
+        try await feed.stream(true)
+        Task { @MainActor in
+            try await Task.sleep(nanoseconds: 200_000_000)
+            feed.show(Data([2]), width: 480, height: 1040, boardMs: 90_000)
+            try await Task.sleep(nanoseconds: 200_000_000)
+            feed.show(Data([3]), width: 480, height: 1040, boardMs: 100_000)
+        }
+        let source = try await feed.currentFrame(wait: 0.3, catchUp: 5)
+        XCTAssertEqual(source, "live")
+        XCTAssertEqual(feed.frame, Data([3]))
+    }
+
     func testReconnectClearsThePreviousPhonesFrame() {
         let feed = VideoFeed()
         let device = FakeDevice()

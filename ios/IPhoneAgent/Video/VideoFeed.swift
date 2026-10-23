@@ -134,9 +134,9 @@ extension ScreenSource {
     }
 
     /// Show a still frame (demo data).
-    func show(_ jpeg: Data, width: Int, height: Int) {
+    func show(_ jpeg: Data, width: Int, height: Int, boardMs: UInt32 = 0) {
         publish(H264Decoder.Frame(jpeg: jpeg, width: width, height: height, decodeMs: 4.2,
-                                  unit: AccessUnit(data: Data(), idr: false, config: false, snap: false, boardMs: 0),
+                                  unit: AccessUnit(data: Data(), idr: false, config: false, snap: false, boardMs: boardMs),
                                   generation: generation))
     }
 
@@ -165,14 +165,21 @@ extension ScreenSource {
     }
 
     /// Streaming never requests a second copy of the buffered GOP. A delayed frame must catch up
-    /// within a bounded wait; arrival time is not evidence that its contents are current.
+    /// within a bounded wait; arrival time is not evidence that its contents are current. A screen
+    /// transition can queue tens of seconds of video on the board's BLE link: while newer frames keep
+    /// arriving, the wait is extended (up to `catchUp` in total) instead of giving up mid-drain.
     @discardableResult
-    func currentFrame(maxAge: Double = 5, wait: Double = 15, after: Double = 0) async throws -> String {
+    func currentFrame(maxAge: Double = 5, wait: Double = 15, catchUp: Double = 90, after: Double = 0) async throws -> String {
         if streamOn {
-            let deadline = now() + wait
+            let started = now()
+            var deadline = started + wait, seen = capturedAt
             while true {
                 try Task.checkCancellation()
                 if live && capturedAt >= after && now() - capturedAt <= maxAge { return "live" }
+                if capturedAt > seen {
+                    seen = capturedAt
+                    deadline = min(max(deadline, now() + wait), started + catchUp)
+                }
                 if now() >= deadline {
                     throw BlindError(reason: "The mirrored screen is delayed or cannot be decoded. No action was sent.")
                 }
