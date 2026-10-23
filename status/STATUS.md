@@ -3,7 +3,7 @@ Updated: 2026-10-23
 
 ## In flight
 - ESP32 firmware updated on MBA; upload checksum, USB health and encrypted credential retention verified.
-- ESP32 Agent 1.0.7 (7) IN_BETA_TESTING: video over the board hotspot (TCP 7100, per-boot token via BLE `vlink`), BLE fallback. Receipt: .testflight/releases/1.0.7-7.json. Firmware with Wi-Fi video flashed on MBA 2026-10-23 (hash verified, NVS config + sealed key retained, vlink answers). Phone-side Wi-Fi video link and background behaviour UNVERIFIED.
+- ESP32 Agent 1.0.7 (7) IN_BETA_TESTING: video over the board hotspot (TCP 7200, per-boot token via BLE `vlink`), BLE fallback. Receipt: .testflight/releases/1.0.7-7.json. Firmware with Wi-Fi video flashed on MBA 2026-10-23 (hash verified, NVS config + sealed key retained, vlink answers). Phone-side Wi-Fi video link and background behaviour UNVERIFIED.
 - All 87 simulator tests pass. MBA BLE: 200 kbps idle, 195 kbps with 0.5 s pings, zero gaps, replies 54–145 ms.
 - Physical iOS 27.2 beta success remains unverified. Old calibration with 49.8% error is rejected and requires recalibration; earlier screenshot had Snap to Item on.
 
@@ -21,6 +21,7 @@ Updated: 2026-10-23
 2. If still failing, inspect startup video metrics; keep board transport and iOS background decoding evidence separate. Do not claim the agent works from a successful upload or Mac BLE benchmark.
 
 ## Gotchas
+- Board TCP ports 7000/7010/7011/7012/7100 belong to AirPlay (src/airplay/ap_internal.h); the Wi-Fi video server is 7200.
 - Build/flash firmware on the MBA from ~/Documents/esp32-iphone-agent (plain copy): rsync hardware/hid_bridge + flash.sh from the mini repo first; arduino-cli is only on the MBA. Board USB port /dev/cu.usbmodem68EE8F5032FC2.
 - Internal testers must be added through Apple's web interface; an external betaTester record with the same email cannot be assigned. Future releases reuse the existing internal member.
 - Run deploy-personal.py from a Terminal .command opened in the mini GUI session; over plain SSH the login keychain is locked (security exit 36). Simulator 825CA8B2 is gone; tests use iPhone 17 572A4F80.
@@ -30,6 +31,7 @@ Updated: 2026-10-23
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-23: Wi-Fi video server on 7100 stole the AirPlay mirror port (mirroring active, no video). Moved to 7200 (5977709), reflashed + verified on MBA; app unchanged.
 - 2026-10-23: Wi-Fi video path (0c6ff51): firmware TCP server + app VideoSocket, 90/90 tests. Released 1.0.7 (7), build 5716d9fa-cba3-4420-a6d3-8ffe096eea2d, notes verified. Firmware flashed and verified on MBA.
 - 2026-10-23: Phone log analysis: calibration check skew = edge-clamped probe tap kept in pointer correction (x 113 vs 90 units); video failures = BLE backlog after AirPlay bursts outlasting the 15 s wait. Fixed both (0db4434), 89/89 tests, new tests fail on old code. Released 1.0.6 (6), build aadbaff0-37e3-45b0-94c2-193b38e336e4, notes verified.
 - 2026-10-23: Ported upstream 6dec6a6 (MetricKit launch crash) and 133ead5 (flash port). 87/87 tests pass. Released 1.0.5 (5), build 3caf4c63-bff6-45ab-99d5-5329e5b154e3, IN_BETA_TESTING; notes verified. Other upstream commits (docs, NOTICE, fastlane) not taken.
@@ -44,4 +46,3 @@ Updated: 2026-10-23
 - 2026-10-16: Apple accepted 1.0.2 (2) upload (delivery 1bbaa089-d18d-46df-91a6-b499ffe19a16). Finalizer resumed using release Python environment; exact notes and internal availability still pending.
 - 2026-10-16: Fixed startup snapshot fallback, stale frame acceptance, reconnect frame retention, and missing-keyframe recovery. Regression tests failed before repair; all 86 tests pass after. Prepared 1.0.2 (2) notes; firmware unchanged.
 - 2026-10-16: Full log confirms 18:55 run waited 167217 ms for snap, starting agent at +177672 ms. USB ok, strong BLE RSSI, model HTTP 200 in 2-3 s. Repeated background decoder invalidation (-12903); earlier snaps ended in BLE disconnect after 84/108 s. No fix deployed yet.
-- 2026-10-16: Checked all upstream issues/comments and PRs. #12 reports a different streaming-with-zero-media bug; no matching fix or confirmed iOS 27.2 regression found. Fork includes latest upstream 9b1a667. Need full log export, not another trace-only ZIP.
