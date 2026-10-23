@@ -1,0 +1,4 @@
+{
+  "en-US": "Fixes tasks not starting in 1.0.12. Starting a task triggered a new calibration every time, and if that calibration failed nothing happened. Now the app calibrates before a run only if it has never been calibrated. The pointer is still re-homed at the start of every run.\n\nAlso fixes video stalling right after it switches from Bluetooth to Wi-Fi: late Bluetooth data reset the video decoder until the next keyframe, which can be minutes away. No firmware change.\n\nCheck that a task starts right away after one calibration, that several runs in a row tap accurately, and whether the app comes back after a task.",
+  "zh-Hans": "修复 1.0.12 中任务无法开始的问题：每次开始任务都会重新校准，校准失败时任务便不会运行。现在仅在从未校准过时才会在任务前校准；每次任务开始时仍会将指针复位。\n\n同时修复视频从蓝牙切换到 Wi-Fi 后立即卡住的问题：延迟到达的蓝牙数据会重置视频解码器，直到下一个关键帧（可能需要几分钟）。无固件变更。\n\n请确认完成一次校准后任务能立即开始、连续多次任务点击准确，以及任务完成后应用是否会回到前台。"
+}

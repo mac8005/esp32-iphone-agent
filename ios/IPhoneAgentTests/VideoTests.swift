@@ -17,6 +17,20 @@ final class VideoTests: XCTestCase {
     let idr: [UInt8] = [0, 0, 0, 1, 0x65, 9, 9]
     let p: [UInt8] = [0, 0, 0, 1, 0x41, 7]
 
+    /// 2026-10-23 phone log: BLE chunks arriving after the switch to Wi-Fi counted ~65k drops and stalled video.
+    @MainActor func testLateChunksFromTheOtherPathAreIgnored() {
+        let feed = VideoFeed()
+        let metrics = Metrics()
+        feed.metrics = metrics
+        feed.receive(chunk(10, [.start, .config], sps, ms: 1))
+        feed.overWiFi = true
+        feed.receive(chunk(11, [.start, .end], p, ms: 2))  // late BLE leftover
+        feed.receive(chunk(9000, [.start, .end, .config], sps, ms: 3), wifi: true)  // the board restarts there
+        feed.receive(chunk(9001, [.start, .end, .idr], idr, ms: 4), wifi: true)
+        XCTAssertEqual(metrics.drops, 0)
+        XCTAssertFalse(feed.broken)
+    }
+
     func testInOrderChunksMakeAccessUnits() {
         var a = VideoAssembler()
         XCTAssertEqual(a.add(chunk(0, [.start, .end, .config], sps, ms: 1000))?.config, true)

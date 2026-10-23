@@ -111,7 +111,8 @@ import UIKit
             self?.modelResponseSeconds = nil
         }
         board.onVideo = { [weak self] in self?.feed.receive($0) }
-        wifiVideo.onChunk = { [weak self] in self?.feed.receive($0) }
+        wifiVideo.onChunk = { [weak self] in self?.feed.receive($0, wifi: true) }
+        wifiVideo.onUp = { [weak self] in self?.feed.overWiFi = $0 }
         presetSink = board.$net.sink { [weak self] net in
             if self?.settings.importBoardPreset(net?.sealedAPIKey) == true {
                 self?.say("Vision model configured from paired board")

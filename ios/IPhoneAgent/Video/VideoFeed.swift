@@ -97,8 +97,15 @@ extension ScreenSource {
     /// Frame width / height (portrait iPhone as a fallback).
     var aspect: Double { size.width > 0 && size.height > 0 ? size.width / size.height : 9 / 19.5 }
 
-    /// One `video` notify from BoardLink.
-    func receive(_ chunk: Data) {
+    /// Video comes over BLE or Wi-Fi, never both. Chunks from the other path are late leftovers: their old seq
+    /// would look like a huge gap and stall decoding until the next IDR (minutes on a still screen).
+    var overWiFi = false {
+        didSet { if overWiFi != oldValue { assembler.reset() } }  // the board restarts from SPS/PPS + IDR there
+    }
+
+    /// One `video` chunk, from a BLE notify or the Wi-Fi link.
+    func receive(_ chunk: Data, wifi: Bool = false) {
+        guard wifi == overWiFi else { return }
         metrics?.videoBytes(chunk.count)
         let dropsBefore = assembler.drops
         let unit = assembler.add(chunk)
@@ -242,7 +249,8 @@ extension ScreenSource {
 /// While it is up the board sends video only here; when it drops, the board falls back to BLE.
 @MainActor final class VideoSocket {
     var onChunk: ((Data) -> Void)?
-    private(set) var up = false
+    var onUp: ((Bool) -> Void)?
+    private(set) var up = false { didSet { if up != oldValue { onUp?(up) } } }
     private var connection: NWConnection?
     var connecting: Bool { connection != nil && !up }
 

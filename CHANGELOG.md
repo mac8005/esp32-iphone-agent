@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.13 (13) — 2026-10-23
+
+- Fix: starting a task no longer recalibrates first. 1.0.12 treated the pointer's normal offset as drift, so every start recalibrated and a failed calibration blocked the run.
+- Fix: video no longer stalls right after switching from Bluetooth to Wi-Fi. Late Bluetooth chunks looked like ~65,000 lost chunks and reset the decoder until the next keyframe (minutes on a still screen).
+- Keeps the 1.0.12 pointer re-home at every run start. No firmware change.
+
 ## 1.0.12 (12) — 2026-10-23
 
 - Every run starts by re-homing the pointer. Between runs iOS can move or recenter it, which made the first taps of the next run miss.
