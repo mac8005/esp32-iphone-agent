@@ -3,11 +3,12 @@ Updated: 2026-10-23
 
 ## In flight
 - ESP32 firmware updated on MBA; upload checksum, USB health and encrypted credential retention verified.
-- ESP32 Agent 1.0.7 (7) IN_BETA_TESTING: video over the board hotspot (TCP 7200, per-boot token via BLE `vlink`), BLE fallback. Receipt: .testflight/releases/1.0.7-7.json. Firmware with Wi-Fi video flashed on MBA 2026-10-23 (hash verified, NVS config + sealed key retained, vlink answers). Phone-side Wi-Fi video link and background behaviour UNVERIFIED.
+- ESP32 Agent 1.0.8 (8) IN_BETA_TESTING (probe residual no longer gates calibration; Wi-Fi video retry 5 s). Receipt: .testflight/releases/1.0.8-8.json. Wi-Fi video (port 7200) verified on phone 2026-10-23: frame 0.15-0.6 s/step, works in background.
 - All 87 simulator tests pass. MBA BLE: 200 kbps idle, 195 kbps with 0.5 s pings, zero gaps, replies 54–145 ms.
 - Physical iOS 27.2 beta success remains unverified. Old calibration with 49.8% error is rejected and requires recalibration; earlier screenshot had Snap to Item on.
 
 ## Decisions
+- 2026-10-23 run breakdown (1.0.7): per step LLM 2.3-3.6 s (TTFT ~2.3 s, 178 KB image), HID 0.4-1.5 s, frame <0.6 s. Waste = missed taps (manual 1-point calibration lacks offset) + iOS stopping mirroring mid-run (~90 s). App already supports separate planner/actor models (Settings.client(role)).
 - Video latency root cause (2026-10-23 log): board forwards every AU in order over BLE (110–135 kbps that day, 200–230 on 10-17); AirPlay bursts of 260–610 kbps at screen transitions queue 20–40 s. App now waits while frames keep advancing (max 90 s). Real fix candidates: lower AirPlay resolution/fps advertised by the board, or raise BLE throughput (Wi-Fi coexistence).
 - Keep provider credentials out of Git; use private internal TestFlight distribution.
 - GPT-6.1 Sol with low reasoning: matched Astra on three screenshot tasks, median 4.2 s vs 4.59 s in the small benchmark.
@@ -31,6 +32,7 @@ Updated: 2026-10-23
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-23: logs 4: Wi-Fi video works; missed taps from failed auto-calibration (residual gate) -> manual fallback. Fixed (e6114a2), 91/91 tests, released 1.0.8 (8) build d3eb5b75-86d5-4e05-acc2-3699495f96e9, notes verified.
 - 2026-10-23: Wi-Fi video server on 7100 stole the AirPlay mirror port (mirroring active, no video). Moved to 7200 (5977709), reflashed + verified on MBA; app unchanged.
 - 2026-10-23: Wi-Fi video path (0c6ff51): firmware TCP server + app VideoSocket, 90/90 tests. Released 1.0.7 (7), build 5716d9fa-cba3-4420-a6d3-8ffe096eea2d, notes verified. Firmware flashed and verified on MBA.
 - 2026-10-23: Phone log analysis: calibration check skew = edge-clamped probe tap kept in pointer correction (x 113 vs 90 units); video failures = BLE backlog after AirPlay bursts outlasting the 15 s wait. Fixed both (0db4434), 89/89 tests, new tests fail on old code. Released 1.0.6 (6), build aadbaff0-37e3-45b0-94c2-193b38e336e4, notes verified.
@@ -45,4 +47,3 @@ Updated: 2026-10-23
 - 2026-10-16: Released 1.0.2 (2), build 1bbaa089-d18d-46df-91a6-b499ffe19a16. Verified IN_BETA_TESTING, Personal Testing membership, and exact en-US/zh-Hans notes. Receipt: .testflight/releases/1.0.2-2.json.
 - 2026-10-16: Apple accepted 1.0.2 (2) upload (delivery 1bbaa089-d18d-46df-91a6-b499ffe19a16). Finalizer resumed using release Python environment; exact notes and internal availability still pending.
 - 2026-10-16: Fixed startup snapshot fallback, stale frame acceptance, reconnect frame retention, and missing-keyframe recovery. Regression tests failed before repair; all 86 tests pass after. Prepared 1.0.2 (2) notes; firmware unchanged.
-- 2026-10-16: Full log confirms 18:55 run waited 167217 ms for snap, starting agent at +177672 ms. USB ok, strong BLE RSSI, model HTTP 200 in 2-3 s. Repeated background decoder invalidation (-12903); earlier snaps ended in BLE disconnect after 84/108 s. No fix deployed yet.

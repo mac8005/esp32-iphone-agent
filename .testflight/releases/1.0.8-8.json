@@ -1,0 +1,17 @@
+{
+  "appId": "6823679885",
+  "version": "1.0.8",
+  "build": "8",
+  "buildId": "d3eb5b75-86d5-4e05-acc2-3699495f96e9",
+  "group": "Personal Testing",
+  "testerState": "INSTALLED",
+  "notes": {
+    "en-US": "Fixes automatic calibration falling back to the manual one-point tap. A slightly noisy probe fit was rejected, and the manual fallback cannot correct the pointer's offset, so taps missed their targets (for example Search or an app icon). The final check tap still requires 1.5% accuracy. Please calibrate again after installing and let it finish automatically.\n\nThe Wi-Fi video link is now retried after 5 seconds instead of 30, so runs start on the fast path. No firmware change.\n\nCheck that calibration passes without asking you to tap the pointer, and that taps land on the first try.",
+    "zh-Hans": "\u4fee\u590d\u81ea\u52a8\u6821\u51c6\u9000\u56de\u5230\u624b\u52a8\u5355\u70b9\u70b9\u51fb\u7684\u95ee\u9898\uff1a\u63a2\u6d4b\u62df\u5408\u7a0d\u6709\u566a\u58f0\u5c31\u4f1a\u88ab\u62d2\u7edd\uff0c\u800c\u624b\u52a8\u6821\u51c6\u65e0\u6cd5\u4fee\u6b63\u6307\u9488\u504f\u79fb\uff0c\u5bfc\u81f4\u70b9\u51fb\u504f\u79bb\u76ee\u6807\uff08\u4f8b\u5982\u641c\u7d22\u6216\u5e94\u7528\u56fe\u6807\uff09\u3002\u6700\u540e\u7684\u68c0\u67e5\u70b9\u51fb\u4ecd\u8981\u6c42 1.5% \u7684\u7cbe\u5ea6\u3002\u5b89\u88c5\u540e\u8bf7\u91cd\u65b0\u6821\u51c6\uff0c\u5e76\u8ba9\u5176\u81ea\u52a8\u5b8c\u6210\u3002\n\nWi-Fi \u89c6\u9891\u8fde\u63a5\u73b0\u5728 5 \u79d2\u540e\u91cd\u8bd5\uff08\u539f\u4e3a 30 \u79d2\uff09\uff0c\u4efb\u52a1\u53ef\u76f4\u63a5\u4f7f\u7528\u5feb\u901f\u901a\u9053\u5f00\u59cb\u3002\u65e0\u56fa\u4ef6\u53d8\u66f4\u3002\n\n\u8bf7\u786e\u8ba4\u6821\u51c6\u65e0\u9700\u624b\u52a8\u70b9\u51fb\u6307\u9488\u5373\u53ef\u901a\u8fc7\uff0c\u4e14\u70b9\u51fb\u7b2c\u4e00\u6b21\u5c31\u80fd\u547d\u4e2d\u76ee\u6807\u3002"
+  },
+  "betaState": {
+    "autoNotifyEnabled": true,
+    "internalBuildState": "IN_BETA_TESTING",
+    "externalBuildState": "NOT_APPLICABLE"
+  }
+}
