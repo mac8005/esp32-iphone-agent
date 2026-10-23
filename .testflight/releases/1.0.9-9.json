@@ -1,0 +1,17 @@
+{
+  "appId": "6823679885",
+  "version": "1.0.9",
+  "build": "9",
+  "buildId": "2906badf-3e4e-43cb-9697-8773f8d3cd94",
+  "group": "Personal Testing",
+  "testerState": "INSTALLED",
+  "notes": {
+    "zh-Hans": "\u4efb\u52a1\u5b8c\u6210\u540e\uff0cESP32 Agent \u73b0\u5728\u4f1a\u81ea\u52a8\u56de\u5230\u524d\u53f0\uff1a\u5f00\u53d1\u677f\u7528 Cmd+\u7a7a\u683c\u6253\u5f00\u641c\u7d22\uff0c\u8f93\u5165\u201cESP32 Agent\u201d\u5e76\u6309\u56de\u8f66\uff0c\u56e0\u4e3a iOS \u4e0d\u5141\u8bb8\u5e94\u7528\u81ea\u884c\u56de\u5230\u524d\u53f0\u3002\u5982\u679c\u4f60\u5df2\u5728\u5e94\u7528\u4e2d\uff0c\u5219\u4e0d\u4f1a\u6709\u4efb\u4f55\u64cd\u4f5c\u3002\u65e0\u56fa\u4ef6\u53d8\u66f4\u3002\n\n\u8bf7\u786e\u8ba4\u5728\u5b8c\u6210\u4efb\u52a1\uff08\u4f8b\u5982\u6253\u5f00 Wi-Fi \u8bbe\u7f6e\uff09\u540e\uff0c\u5e94\u7528\u4f1a\u5728\u51e0\u79d2\u5185\u56de\u5230\u524d\u53f0\u5e76\u663e\u793a\u7ed3\u679c\u3002",
+    "en-US": "When a task finishes, ESP32 Agent now returns to the front by itself. The board opens Search with Cmd+Space, types \"ESP32 Agent\" and presses Return, because iOS does not let an app bring itself to the front. If you are already in the app, nothing happens. No firmware change.\n\nCheck that after a task such as opening Wi-Fi settings, the app comes back within a few seconds and shows the result."
+  },
+  "betaState": {
+    "autoNotifyEnabled": true,
+    "internalBuildState": "IN_BETA_TESTING",
+    "externalBuildState": "NOT_APPLICABLE"
+  }
+}

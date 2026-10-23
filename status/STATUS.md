@@ -3,11 +3,12 @@ Updated: 2026-10-23
 
 ## In flight
 - ESP32 firmware updated on MBA; upload checksum, USB health and encrypted credential retention verified.
-- ESP32 Agent 1.0.8 (8) IN_BETA_TESTING (probe residual no longer gates calibration; Wi-Fi video retry 5 s). Receipt: .testflight/releases/1.0.8-8.json. Wi-Fi video (port 7200) verified on phone 2026-10-23: frame 0.15-0.6 s/step, works in background.
+- ESP32 Agent 1.0.9 (9) IN_BETA_TESTING: returns to the app via Spotlight (Cmd+Space, name, Return) when a run ends in another app; includes 1.0.8 calibration fix. Receipt: .testflight/releases/1.0.9-9.json. Return-to-app UNVERIFIED on phone. User reports 1.0.8 works better.
 - All 87 simulator tests pass. MBA BLE: 200 kbps idle, 195 kbps with 0.5 s pings, zero gaps, replies 54–145 ms.
 - Physical iOS 27.2 beta success remains unverified. Old calibration with 49.8% error is rejected and requires recalibration; earlier screenshot had Snap to Item on.
 
 ## Decisions
+- Decisions API candidate (not built): OpenAI POST /v1/decisions, model gpt-6-luna, accepts images, returns choice/predicate/score with confidence (GA 2026-10-22). Probe 2026-10-23 with real screenshots + on-device Vision OCR labels as choices: 420-590 ms vs 2.3-3.6 s actor, picked Search (conf 0.48 vs other 0.47) and Notes result (conf 0.99). Plan: OCR candidates -> Decisions choice; act when confident, else fall back to the current actor. Jev (TypeSafe) is text-only, unusable for screen decisions.
 - 2026-10-23 run breakdown (1.0.7): per step LLM 2.3-3.6 s (TTFT ~2.3 s, 178 KB image), HID 0.4-1.5 s, frame <0.6 s. Waste = missed taps (manual 1-point calibration lacks offset) + iOS stopping mirroring mid-run (~90 s). App already supports separate planner/actor models (Settings.client(role)).
 - Video latency root cause (2026-10-23 log): board forwards every AU in order over BLE (110–135 kbps that day, 200–230 on 10-17); AirPlay bursts of 260–610 kbps at screen transitions queue 20–40 s. App now waits while frames keep advancing (max 90 s). Real fix candidates: lower AirPlay resolution/fps advertised by the board, or raise BLE throughput (Wi-Fi coexistence).
 - Keep provider credentials out of Git; use private internal TestFlight distribution.
@@ -32,6 +33,7 @@ Updated: 2026-10-23
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-10-23: Released 1.0.9 (9) return-to-app (558f758), build 2906badf-3e4e-43cb-9697-8773f8d3cd94, notes verified. Decisions API latency probe done.
 - 2026-10-23: logs 4: Wi-Fi video works; missed taps from failed auto-calibration (residual gate) -> manual fallback. Fixed (e6114a2), 91/91 tests, released 1.0.8 (8) build d3eb5b75-86d5-4e05-acc2-3699495f96e9, notes verified.
 - 2026-10-23: Wi-Fi video server on 7100 stole the AirPlay mirror port (mirroring active, no video). Moved to 7200 (5977709), reflashed + verified on MBA; app unchanged.
 - 2026-10-23: Wi-Fi video path (0c6ff51): firmware TCP server + app VideoSocket, 90/90 tests. Released 1.0.7 (7), build 5716d9fa-cba3-4420-a6d3-8ffe096eea2d, notes verified. Firmware flashed and verified on MBA.
@@ -46,4 +48,3 @@ Updated: 2026-10-23
 - 2026-10-16: Latest log confirms 49.8% calibration error accepted and startup video stale. Prepared calibration rejection, setup video reception, and firmware heartbeat/debug throttle exemption. MBA USB connected; BLE diagnostics blocked by macOS privacy permission.
 - 2026-10-16: Released 1.0.2 (2), build 1bbaa089-d18d-46df-91a6-b499ffe19a16. Verified IN_BETA_TESTING, Personal Testing membership, and exact en-US/zh-Hans notes. Receipt: .testflight/releases/1.0.2-2.json.
 - 2026-10-16: Apple accepted 1.0.2 (2) upload (delivery 1bbaa089-d18d-46df-91a6-b499ffe19a16). Finalizer resumed using release Python environment; exact notes and internal availability still pending.
-- 2026-10-16: Fixed startup snapshot fallback, stale frame acceptance, reconnect frame retention, and missing-keyframe recovery. Regression tests failed before repair; all 86 tests pass after. Prepared 1.0.2 (2) notes; firmware unchanged.
