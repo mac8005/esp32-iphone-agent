@@ -191,6 +191,19 @@ import XCTest
         XCTAssertFalse(pointer.calibrated)
     }
 
+    func testResetForgetsTheOldPositionSoTheNextTapStartsFromHome() async throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let device = FakeDevice()
+        let pointer = Pointer(device: device, calibrationFile: file)
+        pointer.finishCalibration(x: 0.5, y: 0.25)
+        try await pointer.tap(0.5, 0.5)  // the end of one run
+        try await pointer.reset()        // the start of the next
+        device.sent = []
+        try await pointer.tap(0.5, 0.5)
+        XCTAssertEqual(device.sent.first, "move 200 400")  // from home, not relative to the last run's position
+    }
+
     func testModelSettingsNeedOnlyAnEndpoint() {
         let defaults = UserDefaults(suiteName: UUID().uuidString)!
         let settings = Settings(defaults: defaults, info: nil)  // no build-time preset

@@ -1,0 +1,4 @@
+{
+  "en-US": "Fixes taps going wrong after several runs. Each run now re-homes the pointer before starting, because iOS can move or recenter it between runs. If the learned pointer correction has drifted, the app recalibrates automatically before the run.\n\nIncludes 1.0.10 fast decisions and 1.0.11 Live Activity clearing and return-to-app fallback. No firmware change.\n\nCheck that several runs in a row keep tapping accurately, that finished Live Activities disappear, and that the app comes back after a task.",
+  "zh-Hans": "修复多次运行后点击偏移的问题：每次任务开始前都会先将指针复位，因为 iOS 可能在两次任务之间移动或重新居中指针。若学习到的指针校正已偏移，应用会在任务前自动重新校准。\n\n包含 1.0.10 的快速决策，以及 1.0.11 的实时活动清除和返回应用备用方式。无固件变更。\n\n请确认连续多次任务点击仍然准确、已完成的实时活动会消失，且任务完成后应用会回到前台。"
+}

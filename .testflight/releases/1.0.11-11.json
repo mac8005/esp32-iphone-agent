@@ -1,0 +1,17 @@
+{
+  "appId": "6823679885",
+  "version": "1.0.11",
+  "build": "11",
+  "buildId": "9bd5f351-b0c8-484b-a2b9-e4390c142662",
+  "group": "Personal Testing",
+  "testerState": "INSTALLED",
+  "notes": {
+    "zh-Hans": "\u5df2\u5b8c\u6210\u7684\u5b9e\u65f6\u6d3b\u52a8\u73b0\u5728\u4f1a\u5728\u6253\u5f00\u5e94\u7528\u6216\u5f00\u59cb\u65b0\u4efb\u52a1\u65f6\u6e05\u9664\uff0c\u5e76\u5728 1 \u5206\u949f\u540e\u81ea\u52a8\u6d88\u5931\uff08\u539f\u4e3a 15 \u5206\u949f\uff09\u3002\u4e4b\u524d\u4efb\u52a1\u9057\u7559\u7684\u5b9e\u65f6\u6d3b\u52a8\u4e5f\u4f1a\u88ab\u79fb\u9664\u3002\n\n\u4efb\u52a1\u5b8c\u6210\u540e\u8fd4\u56de\u5e94\u7528\uff1a\u5982\u679c Cmd+\u7a7a\u683c\u5728 iPhone \u4e0a\u65e0\u6cd5\u6253\u5f00\u641c\u7d22\uff0c\u5f00\u53d1\u677f\u4f1a\u56de\u5230\u4e3b\u5c4f\u5e55\u5e76\u4e0b\u62c9\u6253\u5f00\u641c\u7d22\uff0c\u8f93\u5165\u201cESP32 Agent\u201d\u540e\u6309\u56de\u8f66\u3002\u5305\u542b 1.0.10 \u7684\u5feb\u901f\u51b3\u7b56\u3002\u65e0\u56fa\u4ef6\u53d8\u66f4\u3002\n\n\u8bf7\u786e\u8ba4\u4efb\u52a1\u5b8c\u6210\u540e\u5e94\u7528\u4f1a\u56de\u5230\u524d\u53f0\u3002\u5982\u679c\u6ca1\u6709\uff0c\u8bf7\u5bfc\u51fa\u65e5\u5fd7\uff1b\u65e5\u5fd7\u4f1a\u4ee5\u201creturn to app\u201d\u8bb0\u5f55\u6bcf\u6b21\u5c1d\u8bd5\u3002",
+    "en-US": "Finished Live Activities are now cleared when you open the app or start a new run, and disappear on their own after 1 minute instead of 15. Old ones from earlier runs are removed too.\n\nReturning to the app after a task: if Cmd+Space does not open Search on iPhone, the board now goes to the Home Screen, pulls down to open Search, types \"ESP32 Agent\" and presses Return. Includes the 1.0.10 fast decisions. No firmware change.\n\nCheck that the app comes back after a task. If it does not, export the logs; they record each attempt as \"return to app\"."
+  },
+  "betaState": {
+    "autoNotifyEnabled": true,
+    "internalBuildState": "IN_BETA_TESTING",
+    "externalBuildState": "NOT_APPLICABLE"
+  }
+}

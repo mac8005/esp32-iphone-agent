@@ -34,6 +34,8 @@ extension AppModel {
             say(String(localized: "The pointer isn't calibrated yet."))
             return
         }
+        // Between runs iOS may move or recenter the pointer (sleep, hiding it, touches): start from the corner.
+        if !MockMode.on { try? await pointer.reset() }
         do {
             agent.actor = try await settings.client("actor")
             agent.planner = try await settings.client("planner")

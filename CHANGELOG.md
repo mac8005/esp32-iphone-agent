@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.12 (12) — 2026-10-23
+
+- Every run starts by re-homing the pointer. Between runs iOS can move or recenter it, which made the first taps of the next run miss.
+- Before a run, calibrate again automatically when the learned correction has drifted beyond 1.5% (previously only when never calibrated).
+- Includes 1.0.10 fast decisions and 1.0.11 Live Activity clearing and return-to-app fallback. No firmware change.
+
 ## 1.0.11 (11) — 2026-10-23
 
 - Finished Live Activities are removed when the app is opened or a new run starts, and on their own after 1 minute instead of 15. Leftovers from earlier launches are cleared too.
