@@ -194,7 +194,11 @@ extension AppModel {
         ended()
         if let last = agent.steps.last { say("finished: \(last["action"]?.str ?? "") \(last["reason"]?.str ?? last["answer"]?.str ?? "")") }
         if FrameMode.current != .stream { Task { try? await feed.stream(false) } }
-        endBackgroundTask()
+        let task = backgroundTask  // keep running until the app is back in front
+        Task {
+            await returnToApp()
+            if backgroundTask == task { endBackgroundTask() }
+        }
     }
 
     func endBackgroundTask() {

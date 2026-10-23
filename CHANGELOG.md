@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.9 (9) — 2026-10-23
+
+- When a run ends while another app is in front, the board opens Spotlight (Cmd+Space), types "ESP32 Agent" and presses Return to bring the app back. iOS does not let an app bring itself to the front.
+- No firmware change.
+
 ## 1.0.8 (8) — 2026-10-23
 
 - Automatic calibration no longer falls back to the one-point manual tap when the probe fit is slightly noisy; the check tap (within 1.5%) decides. The manual fallback cannot correct the pointer's offset (measured 4.5% horizontally), which made taps miss.
