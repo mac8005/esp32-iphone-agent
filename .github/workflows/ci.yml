@@ -7,12 +7,17 @@ on:
 
 jobs:
   ios:
-    runs-on: macos-26
+    runs-on: xcode-27
     defaults:
       run:
         working-directory: ios
     steps:
       - uses: actions/checkout@v5
+      - name: Select and require the newest published Apple SDK
+        run: |
+          selected_xcode="$(python3 "$GITHUB_WORKSPACE/scripts/latest-apple-sdk.py")"
+          echo "DEVELOPER_DIR=$selected_xcode" >> "$GITHUB_ENV"
+          DEVELOPER_DIR="$selected_xcode" xcodebuild -version
       - name: Unit tests (simulator, unsigned)
         run: |
           sim=$(xcrun simctl list devices available | grep -Eo 'iPhone [0-9]+[A-Za-z ]*\(' | head -1 | sed 's/ ($//')

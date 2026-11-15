@@ -42,6 +42,7 @@ Updated: 2026-11-15
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-11-15: Applied the newest-SDK guard to the remaining iOS validation workflow; older hosted images stop before compiling.
 - 2026-11-15: Released SDK 27.3 rebuild 1.0.16 (16); exact TestFlight group and localized notes independently verified; signing cleanup passed.
 - 2026-11-15: Installed/verified SDK 27.3; added newest-Xcode selection and stale-artifact rejection. Release pending.
 - 2026-11-15: Started latest-SDK release audit; no new build uploaded.
@@ -56,4 +57,3 @@ Updated: 2026-11-15
 - 2026-10-23: Phone log analysis: calibration check skew = edge-clamped probe tap kept in pointer correction (x 113 vs 90 units); video failures = BLE backlog after AirPlay bursts outlasting the 15 s wait. Fixed both (0db4434), 89/89 tests, new tests fail on old code. Released 1.0.6 (6), build aadbaff0-37e3-45b0-94c2-193b38e336e4, notes verified.
 - 2026-10-23: Ported upstream 6dec6a6 (MetricKit launch crash) and 133ead5 (flash port). 87/87 tests pass. Released 1.0.5 (5), build 3caf4c63-bff6-45ab-99d5-5329e5b154e3, IN_BETA_TESTING; notes verified. Other upstream commits (docs, NOTICE, fastlane) not taken.
 - 2026-10-16: Released 1.0.4 (4), build 5e119d9b-c724-407f-8ca9-f598fffd02b3, IN_BETA_TESTING. Personal Testing membership and exact en-US/zh-Hans notes verified. All 87 tests pass; physical iOS 27.2 beta validation pending.
-- 2026-10-16: 1.0.3 (3) IN_BETA_TESTING and en-US/zh-Hans notes verified; receipt saved. Replacement 1.0.4 (4) upload accepted, awaiting Apple processing.
