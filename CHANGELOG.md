@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.16 (16) — 2026-11-15
 
 - Rebuild for iOS 27.3 using Xcode 27.3 beta; retain existing features and minimum OS support.
 - Require the newest published Apple SDK for future releases and reject stale app/extension SDK metadata before upload.

@@ -1,0 +1,17 @@
+{
+  "appId": "6823679885",
+  "version": "1.0.16",
+  "build": "16",
+  "buildId": "d02d7dfe-2369-47a5-8002-061202268993",
+  "group": "Personal Testing",
+  "testerState": "INSTALLED",
+  "notes": {
+    "zh-Hans": "\u4f7f\u7528 Xcode 27.3 Beta \u548c iOS 27.3 SDK \u91cd\u65b0\u6784\u5efa\u3002\u6b64\u7248\u672c\u662f\u4e0a\u4e00 TestFlight \u7248\u672c\u7684\u517c\u5bb9\u6027\u66f4\u65b0\uff0c\u5e94\u7528\u529f\u80fd\u548c\u6700\u4f4e iOS \u7248\u672c\u4e0d\u53d8\u3002\u540e\u7eed\u53d1\u5e03\u5c06\u8981\u6c42\u6700\u65b0\u5df2\u53d1\u5e03\u7684 SDK\uff0c\u5e76\u5728\u4e0a\u4f20\u524d\u68c0\u67e5\u5e94\u7528\u5305\u3002\n\n\u8bf7\u6d4b\u8bd5\u914d\u5bf9\u3001\u5c4f\u5e55\u955c\u50cf\u3001\u6821\u51c6\u3001\u7b80\u77ed\u4efb\u52a1\u4ee5\u53ca\u8fd4\u56de\u5e94\u7528\u3002\u4ecd\u9700\u8981\u73b0\u6709\u914d\u5957\u56fa\u4ef6\uff1b\u672c\u6b21\u4e0d\u5305\u542b\u56fa\u4ef6\u66f4\u65b0\u3002\u5b9e\u9645\u624b\u52bf\u7cbe\u5ea6\u53ca\u8bbe\u5907\u7aef\u5230\u7aef\u884c\u4e3a\u4ecd\u9700\u9a8c\u8bc1\u3002",
+    "en-US": "Rebuilt with Xcode 27.3 beta and the iOS 27.3 SDK. This is a compatibility rebuild of the previous TestFlight release; app features and minimum supported iOS version are unchanged. Future releases require the newest published SDK and verify the packaged app before upload.\n\nPlease check pairing, mirrored video, calibration, a short task and return to the app. Existing companion firmware remains required; this rebuild contains no firmware update. Physical gesture accuracy and end-to-end device behavior remain unverified."
+  },
+  "betaState": {
+    "autoNotifyEnabled": true,
+    "internalBuildState": "IN_BETA_TESTING",
+    "externalBuildState": "NOT_APPLICABLE"
+  }
+}

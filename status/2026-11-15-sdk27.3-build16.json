@@ -1,0 +1,22 @@
+{
+  "verifiedAt": "2026-11-15T21:31:35.102354+00:00",
+  "sourceCommit": "f33c42a",
+  "appId": "6823679885",
+  "buildId": "d02d7dfe-2369-47a5-8002-061202268993",
+  "version": "1.0.16",
+  "build": "16",
+  "processingState": "VALID",
+  "internalBuildState": "IN_BETA_TESTING",
+  "groups": [
+    {
+      "id": "e0769fa0-ceb1-4c48-8d97-53a5758ab84e",
+      "name": "Personal Testing",
+      "internal": true
+    }
+  ],
+  "whatsNew": {
+    "zh-Hans": "使用 Xcode 27.3 Beta 和 iOS 27.3 SDK 重新构建。此版本是上一 TestFlight 版本的兼容性更新，应用功能和最低 iOS 版本不变。后续发布将要求最新已发布的 SDK，并在上传前检查应用包。\n\n请测试配对、屏幕镜像、校准、简短任务以及返回应用。仍需要现有配套固件；本次不包含固件更新。实际手势精度及设备端到端行为仍需验证。",
+    "en-US": "Rebuilt with Xcode 27.3 beta and the iOS 27.3 SDK. This is a compatibility rebuild of the previous TestFlight release; app features and minimum supported iOS version are unchanged. Future releases require the newest published SDK and verify the packaged app before upload.\n\nPlease check pairing, mirrored video, calibration, a short task and return to the app. Existing companion firmware remains required; this rebuild contains no firmware update. Physical gesture accuracy and end-to-end device behavior remain unverified."
+  },
+  "toolchain": "Xcode 27.3 beta (27C5020n), iOS SDK 27.3; artifact verified separately"
+}

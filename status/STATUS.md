@@ -2,11 +2,11 @@
 Updated: 2026-11-15
 
 ## In flight
-- Latest-SDK TestFlight rebuild authorized for all active iOS apps and existing groups. Xcode 27.3 beta installed and verified (27C5020n, iOS/watchOS 27.3), default selected. Newest-SDK release guards implemented and regression-tested; builds and exact TestFlight verification next. [Checkpoint](2026-11-15-latest-sdk.md).
+- SDK 27.3 rebuild released: 1.0.16 (16), exact VALID / IN_BETA_TESTING, existing audience and notes independently verified. Physical checks remain. [Evidence](2026-11-15-latest-sdk.md).
 - ESP32 firmware updated on MBA; upload checksum, USB health and encrypted credential retention verified.
 - ESP32 Agent 1.0.15 (15) IN_BETA_TESTING + firmware flashed 2026-10-23 (constant-speed straight moves via src/motion/stroke.c, new `path` stroke command; hash verified, NVS config + sealed key kept). App: check tap before every run (recalibrates on >1.5% miss), drags as one `path`, aim only after a miss, return-to-app via Home + OCR Search field + result (frames saved to Documents/return/). Receipt .testflight/releases/1.0.15-15.json. Phone behaviour UNVERIFIED.
 - All 87 simulator tests pass. MBA BLE: 200 kbps idle, 195 kbps with 0.5 s pings, zero gaps, replies 54–145 ms.
-- Physical iOS 27.2 beta success remains unverified. Old calibration with 49.8% error is rejected and requires recalibration; earlier screenshot had Snap to Item on.
+- Physical iOS 27.3 compatibility remains unverified. Old calibration with 49.8% error is rejected and requires recalibration; earlier screenshot had Snap to Item on.
 
 ## Decisions
 - Pointer model (fit on 252 probes, scratch analysis 2026-10-23): iOS gain depends on report speed; old per-axis capping gave diagonal reports 14 units vs 10, stretching axes per move (per-axis line residual up to 4%, report-speed model 0.1-0.6%). Firmware now sends equal 10-unit reports along a straight line. Start corner usually (18,18) pt but shifted to (-4,-4) in one session -> check tap before every run.
@@ -42,6 +42,7 @@ Updated: 2026-11-15
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-11-15: Released SDK 27.3 rebuild 1.0.16 (16); exact TestFlight group and localized notes independently verified; signing cleanup passed.
 - 2026-11-15: Installed/verified SDK 27.3; added newest-Xcode selection and stale-artifact rejection. Release pending.
 - 2026-11-15: Started latest-SDK release audit; no new build uploaded.
 - 2026-10-23: logs 7: taps off up to 12% (axis-coupled firmware stepping + shifted start corner), aim unreliable, drawing distorted by per-point BLE timing, return failed. Fixed in firmware (stroke walker + path) and app (2554306); 99/99 iOS + host tests; released 1.0.15 (15) build d512ee20-b299-4266-b333-a62498cb7d37, notes verified; board flashed. Mini release windows cleaned up; release.command self-closes.
@@ -56,6 +57,3 @@ Updated: 2026-11-15
 - 2026-10-23: Ported upstream 6dec6a6 (MetricKit launch crash) and 133ead5 (flash port). 87/87 tests pass. Released 1.0.5 (5), build 3caf4c63-bff6-45ab-99d5-5329e5b154e3, IN_BETA_TESTING; notes verified. Other upstream commits (docs, NOTICE, fastlane) not taken.
 - 2026-10-16: Released 1.0.4 (4), build 5e119d9b-c724-407f-8ca9-f598fffd02b3, IN_BETA_TESTING. Personal Testing membership and exact en-US/zh-Hans notes verified. All 87 tests pass; physical iOS 27.2 beta validation pending.
 - 2026-10-16: 1.0.3 (3) IN_BETA_TESTING and en-US/zh-Hans notes verified; receipt saved. Replacement 1.0.4 (4) upload accepted, awaiting Apple processing.
-- 2026-10-16: Replacement 1.0.4 (4), commit 575f6d0, passes all 87 tests. Release pipeline started; no further firmware changes needed.
-- 2026-10-16: Final lifecycle review found explicit stream stops after calibration and task completion would replay history on next warmup. Removed these in streaming mode; preparing replacement 1.0.4 (4), tests running.
-- 2026-10-16: Apple accepted 1.0.3 (3). On-board BLE tests pass at 200 kbps idle and 195 kbps with 0.5 s heartbeat traffic, zero gaps, 54–145 ms replies. SSH Bluetooth is denied; launch diagnostics as a Terminal .command via open on MBA.
