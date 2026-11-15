@@ -28,7 +28,8 @@ for line in (sidepulse / 'config.env').read_text().splitlines():
     if '=' in line and not line.startswith('#'):
         name, value = line.split('=', 1)
         os.environ[name] = os.path.expandvars(os.path.expanduser(shlex.split(value)[0]))
-os.environ['DEVELOPER_DIR'] = '/Users/massimo/Developer/Xcode-27.1-rc/Xcode-27.1.0-release.candidate.app/Contents/Developer'
+if not args.finalize_only:
+    os.environ['DEVELOPER_DIR'] = subprocess.check_output(['python3', str(repo/'scripts/latest-apple-sdk.py')], text=True).strip()
 root = Path('/Users/massimo/Developer/esp32-iphone-agent')
 work = root / 'releases' / f'{args.version}-{args.build}'
 if args.finalize_only:
@@ -83,6 +84,7 @@ if not args.finalize_only:
     with zipfile.ZipFile(ipa) as package:
         assert all(provider_key.encode() not in package.read(name) for name in package.namelist())
     del provider_key
+    subprocess.run(['python3', str(repo/'scripts/latest-apple-sdk.py'), '--verify', str(ipa)], check=True)
     run(['xcrun','altool','--upload-app','--type','ios','--file',str(ipa),'--apiKey',os.environ['ASC_KEY_ID'],'--apiIssuer',os.environ['ASC_ISSUER_ID']], 'upload.log')
 api = runpy.run_path(str(sidepulse/'lib/finalize-testflight.py'))
 def request(method,path,body=None):

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Rebuild for iOS 27.3 using Xcode 27.3 beta; retain existing features and minimum OS support.
+- Require the newest published Apple SDK for future releases and reject stale app/extension SDK metadata before upload.
+- Check the existing primary app flows on physical devices after installing this compatibility build.
+
 ## 1.0.15 (15) — 2026-10-23
 
 - Firmware: every pointer report now moves the same distance along a straight line. Capping each axis separately made diagonal reports faster than straight ones, and iOS scales speed, so x and y were stretched differently per move (fit against 252 recorded calibration taps: per-axis model up to 4% off, report-speed model 0.1–0.6%).

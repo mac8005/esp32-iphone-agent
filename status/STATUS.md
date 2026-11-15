@@ -2,7 +2,7 @@
 Updated: 2026-11-15
 
 ## In flight
-- Latest-SDK TestFlight rebuild authorized for all active iOS apps and existing groups. Xcode 27.3 beta is Apple-approved for TestFlight; local installation pending authenticated download. Release guards and SDK verification in progress. [Checkpoint](2026-11-15-latest-sdk.md).
+- Latest-SDK TestFlight rebuild authorized for all active iOS apps and existing groups. Xcode 27.3 beta installed and verified (27C5020n, iOS/watchOS 27.3), default selected. Newest-SDK release guards implemented and regression-tested; builds and exact TestFlight verification next. [Checkpoint](2026-11-15-latest-sdk.md).
 - ESP32 firmware updated on MBA; upload checksum, USB health and encrypted credential retention verified.
 - ESP32 Agent 1.0.15 (15) IN_BETA_TESTING + firmware flashed 2026-10-23 (constant-speed straight moves via src/motion/stroke.c, new `path` stroke command; hash verified, NVS config + sealed key kept). App: check tap before every run (recalibrates on >1.5% miss), drags as one `path`, aim only after a miss, return-to-app via Home + OCR Search field + result (frames saved to Documents/return/). Receipt .testflight/releases/1.0.15-15.json. Phone behaviour UNVERIFIED.
 - All 87 simulator tests pass. MBA BLE: 200 kbps idle, 195 kbps with 0.5 s pings, zero gaps, replies 54–145 ms.
@@ -42,6 +42,7 @@ Updated: 2026-11-15
 - USB CDC input buffer is 256 bytes; provisioning script sends 64-byte chunks. Never log decrypted keys.
 
 ## Log
+- 2026-11-15: Installed/verified SDK 27.3; added newest-Xcode selection and stale-artifact rejection. Release pending.
 - 2026-11-15: Started latest-SDK release audit; no new build uploaded.
 - 2026-10-23: logs 7: taps off up to 12% (axis-coupled firmware stepping + shifted start corner), aim unreliable, drawing distorted by per-point BLE timing, return failed. Fixed in firmware (stroke walker + path) and app (2554306); 99/99 iOS + host tests; released 1.0.15 (15) build d512ee20-b299-4266-b333-a62498cb7d37, notes verified; board flashed. Mini release windows cleaned up; release.command self-closes.
 - 2026-10-23: logs 6: missed taps = open-loop error up to 8% after good calibration; return-to-app worked but check misread .inactive. Fixed (d42b7bd), 96/96 tests, released 1.0.14 (14) build bd033083-5a81-4c03-8d42-e17a4c699afb, notes verified.
